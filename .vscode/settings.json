@@ -1,0 +1,8 @@
+{
+    "Lua.diagnostics.globals": [
+        "UIParent",
+        "SharedTooltip_SetBackdropStyle",
+        "NineSlicePanelMixin",
+        "CreateFramePool"
+    ]
+}
