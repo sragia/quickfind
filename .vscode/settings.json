@@ -3,6 +3,8 @@
         "UIParent",
         "SharedTooltip_SetBackdropStyle",
         "NineSlicePanelMixin",
-        "CreateFramePool"
+        "CreateFramePool",
+        "TOY",
+        "SlashCmdList"
     ]
 }

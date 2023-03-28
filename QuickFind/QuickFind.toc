@@ -5,9 +5,12 @@
 ## SavedVariables: QuickFind
 ## Version: @project-version@
 
-init.lua
-util.lua
-core.lua
+Init.lua
+Util.lua
+Core.lua
 
-Finder/finder.lua
-Finder/suggestions.lua
+Options/Frames/Window.lua
+Options/Core.lua
+
+Finder/Finder.lua
+Finder/Suggestions.lua

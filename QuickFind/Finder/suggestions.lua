@@ -7,10 +7,6 @@ local suggestions = QF:GetModule(moduleName)
 suggestions.init = function(self)
     self.suggestionContainer = CreateFrame('Frame', 'QFSuggestionsContainer', UIParent)
     self.suggestionContainer:SetSize(1, 1)
-    local left, bottom = finder.editBox:GetRect()
-    local scale = finder.container:GetScale()
-    self.suggestionContainer:SetScale(scale)
-    self.suggestionContainer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left - 25, bottom)
 
     -- Suggestion Pool
     self.buttonPool = CreateFramePool('BUTTON', self.suggestionContainer, "SecureActionButtonTemplate")
@@ -37,6 +33,10 @@ end
 
 suggestions.Show = function(self)
     if (self.suggestionContainer) then
+        local left, bottom = finder.editBox:GetRect()
+        local scale = finder.container:GetScale()
+        self.suggestionContainer:SetScale(scale)
+        self.suggestionContainer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left - 25, bottom - 15)
         self.suggestionContainer:Show()
         self.suggestionContainer.fadeIn:Play()
     end
@@ -52,11 +52,10 @@ suggestions.Refresh = function(self, value)
         local f = self.buttonPool:Acquire()
         f:SetPropagateKeyboardInput(true)
         self:ConfigureFrame(f)
+        f.index = index
+        f.suggestion = suggestion
         self:SetOnClick(f, suggestion)
-        f:SetText(suggestion.data.name)
-        f:SetIcon(suggestion.data.icon)
-        f:SetTag(suggestion.data.type)
-        f:HandleCD(suggestion.data)
+        f:init()
         f:Show()
 
         f:SetPoint("TOPLEFT", self.suggestionContainer, "BOTTOMLEFT", 0, ((index - 1) * -32) - 15)
@@ -65,6 +64,9 @@ end
 
 suggestions.ConfigureFrame = function(self, frame)
     frame:SetSize(320, 26)
+    frame.hoverColor = { 1, 0.84, 0, 1 }
+    frame.isDisabledColor = { 0.30, 0.30, 0.30, 1 }
+    frame.isDisabled = false
 
     if (not frame.bg) then
         -- BG
@@ -97,7 +99,11 @@ suggestions.ConfigureFrame = function(self, frame)
         frame.SetIcon = function(_, iconId)
             icon:SetTexture(iconId)
         end
+        frame.SetDesatured = function(self, value)
+            icon:SetDesaturated(value)
+        end
     end
+    frame:SetDesatured(false)
 
     if (not frame.tag) then
         local tagContainer = CreateFrame('Frame')
@@ -123,6 +129,7 @@ suggestions.ConfigureFrame = function(self, frame)
 
         frame.SetTag = function(_, tagType)
             tag:SetText(tagType)
+            tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
         end
     end
 
@@ -136,30 +143,24 @@ suggestions.ConfigureFrame = function(self, frame)
         frame.SetTextColor = function(_, r, g, b, a) textFrame:SetVertexColor(r, g, b, a) end
     end
 
-    if (not frame.hoverBorder) then
-        local hoverContainer = CreateFrame('Frame', null, frame)
+    if (not frame.hoverContainer) then
+        local hoverContainer = CreateFrame('Frame', nil, frame)
         hoverContainer:SetAllPoints()
         local hoverBorder = hoverContainer:CreateTexture()
-        frame.hoverBorder = hoverBorder
+        hoverContainer.border = hoverBorder
+        frame.hoverContainer = hoverContainer
         hoverBorder:SetTexture(QF.default.barBorderGlow)
-        hoverBorder:SetVertexColor(1, 0.84, 0, 1)
         hoverBorder:SetPoint('CENTER', -30)
         hoverBorder:SetHeight(75)
         hoverBorder:SetWidth(350)
         hoverContainer:SetAlpha(0)
-        local animDur = 0.15
-        frame.onHover = QF.utils.animation.fade(hoverContainer, animDur, 0, 1)
-        frame.onHoverLeave = QF.utils.animation.fade(hoverContainer, animDur, 1, 0)
-
-        frame:SetScript('OnEnter', function(self)
-            self.onHover:Play()
-            C_Timer.After(animDur / 2, function() frame:SetTextColor(1, 0.84, 0, 1) end)
-            self:SetTextColor(1, 0.84, 0, 1)
-        end)
-        frame:SetScript('OnLeave', function(self)
-            self.onHoverLeave:Play()
-            C_Timer.After(animDur / 2, function() frame:SetTextColor(1, 1, 1, 1) end)
-        end)
+        frame.animDur = 0.15
+        frame.onHover = QF.utils.animation.fade(hoverContainer, frame.animDur, 0, 1)
+        frame.onHoverLeave = QF.utils.animation.fade(hoverContainer, frame.animDur, 1, 0)
+        frame.SetHoverColor = function(self)
+            hoverBorder:SetVertexColor(unpack(self.hoverColor))
+        end
+        frame:SetHoverColor()
     end
 
     if (not frame.cdText) then
@@ -169,13 +170,30 @@ suggestions.ConfigureFrame = function(self, frame)
         cdText:SetWidth(0)
         frame.cdText = cdText
     else
-        frame:SetScript("OnUpdate", null)
+        frame:SetScript("OnUpdate", nil)
         frame.cdText:SetText('')
     end
 
+    if (not frame.notAvailable) then
+        local notAvailable = frame:CreateFontString(nil, "OVERLAY")
+        notAvailable:SetFont(QF.default.font, 8, "OUTLINE")
+        notAvailable:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
+        notAvailable:SetWidth(0)
+        notAvailable:SetVertexColor(0.54, 0.54, 0.54, 1)
+        notAvailable:SetText("Not Available")
+        frame.notAvailable = notAvailable
+    end
+    frame.notAvailable:Hide()
+
     frame.HandleCD = function(self, suggestionData)
         local setCDText = function()
-            local start, duration = GetSpellCooldown(suggestionData.spellId)
+            local start, duration = 0, 0
+            if suggestionData.type == QF.LOOKUP_TYPE.SPELL then
+                start, duration = GetSpellCooldown(suggestionData.spellId)
+            elseif suggestionData.type == QF.LOOKUP_TYPE.ITEM or suggestionData.type == QF.LOOKUP_TYPE.TOY then
+                start, duration = GetItemCooldown(suggestionData.itemId)
+            end
+
             if (start + duration > GetTime()) then
                 self.cdText:SetText('On CD: ' ..
                     WrapTextInColorCode(QF.utils.formatTime(start + duration - GetTime()), "ffc1c1c1"))
@@ -192,18 +210,91 @@ suggestions.ConfigureFrame = function(self, frame)
                     local onCD = setCDText()
                     if (not onCD) then
                         self.cdText:SetText('')
-                        self:SetScript('OnUpdate', null)
+                        self:SetScript('OnUpdate', nil)
                     end
                     self.elapsed = 0
                 end
             end)
         end
     end
+
+    frame.SetSelected = function(self, value, noAnim)
+        if (value) then
+            if (noAnim) then
+                self.hoverContainer:SetAlpha(1)
+                self:SetTextColor(unpack(self.hoverColor))
+            else
+                self.onHover:Play()
+                C_Timer.After(self.animDur / 2, function() frame:SetTextColor(unpack(self.hoverColor)) end)
+            end
+            _G['QFSelectedSuggestion'] = self
+        else
+            if (noAnim) then
+                self.hoverContainer:SetAlpha(0)
+                if (self.isDisabled) then
+                    frame:SetTextColor(unpack(frame.isDisabledColor))
+                else
+                    frame:SetTextColor(1, 1, 1, 1)
+                end
+            else
+                self.onHoverLeave:Play()
+                C_Timer.After(self.animDur / 2,
+                    function()
+                        if (self.isDisabled) then
+                            frame:SetTextColor(unpack(frame.isDisabledColor))
+                        else
+                            frame:SetTextColor(1, 1, 1, 1)
+                        end
+                    end
+                )
+            end
+        end
+
+        self.selected = value
+    end
+
+    frame.SetDisabled = function(self)
+        self.isDisabled = true
+        self.notAvailable:Show()
+        self.hoverColor = { 0.54, 0.54, 0.54, 1 }
+        self:SetTextColor(unpack(self.isDisabledColor))
+        self:SetHoverColor()
+        self:SetDesatured(true)
+    end
+
+    frame:SetScript("OnEnter", function(self) self:SetSelected(true) end)
+    frame:SetScript("OnLeave", function(self) self:SetSelected(false) end)
+
+    frame.init = function(self)
+        local data = self.suggestion.data
+        self:SetText(data.name)
+        self:SetIcon(data.icon)
+        self:SetTag(data.type)
+        self:HandleCD(data)
+        self:SetHoverColor()
+        self:SetTextColor(1, 1, 1, 1)
+
+        if (data.type == QF.LOOKUP_TYPE.SPELL) then
+            if (not IsSpellKnown(data.spellId)) then
+                self:SetDisabled()
+            end
+        elseif (data.type == QF.LOOKUP_TYPE.ITEM) then
+            if (GetItemCount(data.itemId) <= 0) then
+                self:SetDisabled()
+            end
+        end
+    end
 end
 
 suggestions.SetOnClick = function(self, frame, suggestion)
-    frame:SetAttribute("type", "spell")
-    frame:SetAttribute("spell", suggestion.data.spellId)
+    if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
+        frame:SetAttribute("type", "item")
+        local itemName = GetItemInfo(suggestion.data.itemId)
+        frame:SetAttribute("item", itemName)
+    elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
+        frame:SetAttribute("type", "spell")
+        frame:SetAttribute("spell", suggestion.data.spellId)
+    end
     frame:SetScript("PostClick", function()
         finder:HideFinder()
     end)

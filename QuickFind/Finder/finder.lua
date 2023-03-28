@@ -43,7 +43,7 @@ finder.CreateSearchBox = function(self)
     finderFrame:SetHeight(1)
     finderFrame:SetWidth(1)
 
-    self.container = CreateFrame("Frame", null, finderFrame)
+    self.container = CreateFrame("Frame", nil, finderFrame)
     self.container:SetAllPoints()
     self.container:Hide()
     self.container.fadeIn = QF.utils.animation.fade(self.container, 0.2, 0, 1)
@@ -59,13 +59,14 @@ end
 finder.CreateEditBox = function(self)
     local editBox = CreateFrame("EditBox", "QFFinderEditBox", self.container)
     self.editBox = editBox
+    editBox:SetFrameStrata("DIALOG")
     editBox:SetAutoFocus(false)
     editBox:SetPoint("TOP", 30)
     editBox:SetWidth(270)
     editBox:SetHeight(23)
 
     -- BG
-    local tex = editBox:CreateTexture()
+    local tex = editBox:CreateTexture(nil, "BACKGROUND", nil, -5)
     tex:SetTexture([[Interface/Addons/QuickFind/Media/Texture/bar]])
     tex:SetVertexColor(0, 0, 0, 0.6)
     tex:SetPoint('CENTER', -30)
@@ -73,7 +74,7 @@ finder.CreateEditBox = function(self)
     tex:SetWidth(350)
 
     -- Icon
-    local searchIcon = editBox:CreateTexture()
+    local searchIcon = editBox:CreateTexture(nil, "BACKGROUND", nil, -5)
     searchIcon:SetTexture([[Interface/Addons/QuickFind/Media/Texture/icon-search]])
     searchIcon:SetVertexColor(1, 1, 1, 0.8)
     searchIcon:SetPoint("LEFT", -20, 0)
