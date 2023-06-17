@@ -12,6 +12,8 @@ QF.GetModule = function(self, id)
         self.modules[id] = {
             _index = initIndx
         }
+
+        QF.utils.addObserver(self.modules[id])
     end
 
     return self.modules[id]
@@ -26,9 +28,41 @@ QF.InitModules = function(self)
     end
 end
 
+local function init()
+    if not QF.data or next(QF.data) == nil then
+        -- TODO: Remove before release
+        QF.data = {}
+        for _, optionData in ipairs(QF.BASE_LOOKUPS) do
+            QF.data[optionData.id] = optionData
+        end
+    end
+end
+
+QF.SaveData = function(self, id, data)
+    if (self.data[id]) then
+        self.data[id] = data
+    end
+end
+
+QF.SaveDataByKey = function(self, id, key, data)
+    if (self.data[id]) then
+        self.data[id][key] = data
+    end
+end
+
 QF.handler:RegisterEvent("ADDON_LOADED")
+QF.handler:RegisterEvent("PLAYER_LOGOUT")
 QF.handler:SetScript("OnEvent", function(self, event, arg1)
     if (event == "ADDON_LOADED" and arg1 == addonName) then
+        QF.data = QuickFindData
+        init()
         QF:InitModules()
+    end
+    if event == "PLAYER_LOGOUT" then
+        -- save things
+        if QF.data and next(QF.data) ~= nil then
+            QuickFindData = QF.data
+        end
+        return
     end
 end)

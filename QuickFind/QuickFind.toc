@@ -2,7 +2,7 @@
 ## Title: QuickFind
 ## Notes: Shows various information about your characters
 ## Author: Exality
-## SavedVariables: QuickFind
+## SavedVariables: QuickFindData
 ## Version: @project-version@
 
 Init.lua
@@ -10,6 +10,10 @@ Util.lua
 Core.lua
 
 Options/Frames/Window.lua
+Options/Frames/Inputs/Text.lua
+Options/Frames/Inputs/Dropdown.lua
+
+Options/Frames/OptionContainer.lua
 Options/Core.lua
 
 Finder/Finder.lua

@@ -138,5 +138,26 @@ QF.utils = {
             return string.format("%02d:%02d:%02d", hours, minutes, seconds)
         end
         return string.format("%02d:%02d", minutes, seconds)
+    end,
+    addObserver = function(t)
+        if (t.observable) then
+            return t
+        end
+
+        t.observable = {}
+        t.Observe = function(_, key, onChangeFunc)
+            t.observable[key] = t.observable[key] or {}
+            table.insert(t.observable[key], onChangeFunc)
+        end
+        t.SetValue = function(_, key, value)
+            t[key] = value
+            if (t.observable[key]) then
+                for _, func in ipairs(t.observable[key]) do
+                    func(value)
+                end
+            end
+        end
+
+        return t
     end
 }

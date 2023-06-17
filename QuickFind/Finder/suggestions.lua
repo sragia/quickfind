@@ -43,7 +43,7 @@ suggestions.Show = function(self)
 end
 
 suggestions.Refresh = function(self, value)
-    local suggestions = QF.utils.suggestMatch(value, QF.BASE_LOOKUPS)
+    local suggestions = QF.utils.suggestMatch(value, QF.data)
     self.buttonPool:ReleaseAll()
     for index, suggestion in ipairs(suggestions) do
         if (index > QF.default.maxSuggestions) then
