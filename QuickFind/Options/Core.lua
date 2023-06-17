@@ -22,21 +22,80 @@ options.init = function(self)
         scrollChild:SetHeight(1)
         scrollFrame.child = scrollChild
 
-        scrollFrame:SetScript("OnMouseWheel", function(self, delta)
-            local currentValue = self:GetVerticalScroll()
-
+        scrollFrame.GetBottomScrollValue = function(self)
             local max = 0
             for _, child in pairs({ self.child:GetChildren() }) do
-                max = max + child:GetHeight()
+                if (child:IsShown()) then
+                    max = max + child:GetHeight()
+                end
             end
-            max = max - scrollFrame:GetHeight()
+            max = max - self:GetHeight()
 
+            return max
+        end
+
+        scrollFrame:SetScript("OnMouseWheel", function(self, delta)
+            local currentValue = self:GetVerticalScroll()
+            local max = self:GetBottomScrollValue()
             local scrollOffset = 40
-            currentValue = math.min(math.max(currentValue + (delta > 0 and -1 or 1) * scrollOffset, 0), max)
+            currentValue = math.min(math.max(currentValue + (delta > 0 and -1 or 1) * scrollOffset, 0),
+                max + scrollOffset)
             self:SetVerticalScroll(currentValue)
         end)
 
-        windowFrame.scrollFrame = scrollChild
+        windowFrame.scrollFrame = scrollFrame
+        windowFrame.scrollChild = scrollChild
+    end
+
+    if (not windowFrame.addNewBtn) then
+        local btn = CreateFrame('Button', nil, windowFrame)
+        windowFrame.addNewBtn = btn
+        btn:SetSize(60, 40)
+        btn:SetPoint("BOTTOMRIGHT", -30, 25)
+        btn:SetFrameLevel(windowFrame:GetFrameLevel() + 10)
+
+        local textFrame = btn:CreateFontString(nil, "OVERLAY")
+        textFrame:SetFont(QF.default.font, 10, "OUTLINE")
+        textFrame:SetPoint("CENTER")
+        textFrame:SetWidth(0)
+        textFrame:SetText('New')
+        btn.text = textFrame
+
+        local hoverContainer = CreateFrame('Frame', nil, btn)
+        hoverContainer:SetAllPoints()
+        local hoverBorder = hoverContainer:CreateTexture()
+        hoverContainer.border = hoverBorder
+        btn.hoverContainer = hoverContainer
+        hoverContainer:SetFrameLevel(btn:GetFrameLevel() - 1)
+        hoverBorder:SetTexture(QF.default.barBg)
+        hoverBorder:SetPoint("TOPLEFT", 0, 8)
+        hoverBorder:SetPoint("BOTTOMRIGHT", 0, -8)
+        hoverContainer:SetAlpha(0)
+        btn.animDur = 0.15
+        btn.onHover = QF.utils.animation.fade(hoverContainer, btn.animDur, 0, 1)
+        btn.onHoverLeave = QF.utils.animation.fade(hoverContainer, btn.animDur, 1, 0)
+        hoverBorder:SetVertexColor(1, 0.84, 0, 1)
+
+        btn:SetScript('OnLeave', function(self)
+            self.onHoverLeave:Play()
+            self.text:SetVertexColor(1, 1, 1, 1)
+            self.text:SetFont(QF.default.font, 10, "OUTLINE")
+        end)
+        btn:SetScript('OnEnter', function(self)
+            self.onHover:Play()
+            self.text:SetVertexColor(0, 0, 0, 1)
+            self.text:SetFont(QF.default.font, 10, "NONE")
+        end)
+        btn:SetScript('OnClick', function()
+            local id = QF.utils.generateNewId()
+            QF:SaveData(id, {
+                id = id,
+                created = time()
+            })
+            options.options = QF.data
+            options:PopulateOptions()
+            options.window.scrollFrame:SetVerticalScroll(options.window.scrollFrame:GetBottomScrollValue())
+        end)
     end
     self.options = QF.data
 
@@ -44,22 +103,38 @@ options.init = function(self)
     self:PopulateOptions()
 end
 
+options.OnDelete = function(id)
+    return function()
+        QF:DeleteByKey(id)
+        options.options = QF.data
+        options:PopulateOptions()
+        options.window.scrollFrame:SetVerticalScroll(options.window.scrollFrame:GetBottomScrollValue())
+    end
+end
+
 options.PopulateOptions = function(self)
     optionContainer:DestroyAllOptions()
     self.optionFrames = {}
-    for _, optionData in ipairs(self.options) do
-        table.insert(self.optionFrames, optionContainer:CreateOption(optionData))
+    for id, optionData in QF.utils.spairs(self.options, function(t, a, b)
+        if (t[a].created and t[b].created) then
+            return t[a].created < t[b].created
+        end
+        return true
+    end) do
+        if (optionData) then
+            table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id)))
+        end
     end
 
     for index, optionFrame in ipairs(self.optionFrames) do
         if (index == 1) then
-            optionFrame:SetPoint("TOPLEFT", self.window.scrollFrame)
-            optionFrame:SetPoint("TOPRIGHT", self.window.scrollFrame)
+            optionFrame:SetPoint("TOPLEFT", self.window.scrollChild)
+            optionFrame:SetPoint("TOPRIGHT", self.window.scrollChild)
         else
             optionFrame:SetPoint("TOPLEFT", self.optionFrames[index - 1], "BOTTOMLEFT")
             optionFrame:SetPoint("TOPRIGHT", self.optionFrames[index - 1], "BOTTOMRIGHT")
         end
-        optionFrame:SetParent(self.window.scrollFrame)
+        optionFrame:SetParent(self.window.scrollChild)
         optionFrame:Show()
     end
 end
@@ -110,6 +185,7 @@ options.CreateSearchInput = function(self)
                 options.options = filteredOptions
             end
             options:PopulateOptions()
+            options.window.scrollFrame:SetVerticalScroll(0)
         end
     end)
     -- Base logic

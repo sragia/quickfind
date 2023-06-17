@@ -137,7 +137,7 @@ local function ConfigureFrame(f, options)
     if (not f.label and options.label) then
         local textFrame = f:CreateFontString(nil, "OVERLAY")
         textFrame:SetFont(QF.default.font, 8, "OUTLINE")
-        textFrame:SetPoint("BOTTOMLEFT", f.valueDisplay, "TOPLEFT", 0, 15)
+        textFrame:SetPoint("BOTTOMLEFT", f.valueDisplay, "TOPLEFT", 0, 16)
         textFrame:SetWidth(0)
         f.label = textFrame
         textFrame:SetText(options.label)

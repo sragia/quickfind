@@ -20,6 +20,12 @@ optionContainer.init = function(self)
         frame:Hide();
         frame:ClearAllPoints();
         frame.data = {}
+        if (frame.created) then
+            frame:SetIcon(QF.default.unknownIcon)
+            frame:SetTag('Unknown')
+            frame:SetText('Unknown')
+            frame:SetValue('isOpen', false)
+        end
     end)
 end
 
@@ -43,7 +49,7 @@ local function renderLayout(f, inputs)
             if (index > 4 or index == 1) then
                 row = index > 4 and row + 1 or row
                 index = 1
-                input.frame:SetPoint("TOPLEFT", 15, row * -55 + -5)
+                input.frame:SetPoint("TOPLEFT", 20, row * -55 + -5)
             else
                 input.frame:SetPoint("TOPLEFT", previous, "TOPRIGHT", 25, 0)
             end
@@ -161,6 +167,53 @@ local function AddOptions(f, data)
     bodyFrame.itemId.onChange = onValueChange(data.id, 'itemId', f)
     bodyFrame.itemId.editBox:SetText(data.itemId or '')
     renderLayout(f, f.inputTypes)
+
+    if (not bodyFrame.deleteBtn) then
+        local btn = CreateFrame('Button', nil, bodyFrame)
+        bodyFrame.deleteBtn = btn
+        btn:SetSize(60, 40)
+        btn:SetPoint("BOTTOMRIGHT", -30, 25)
+        btn:SetFrameLevel(bodyFrame:GetFrameLevel() + 10)
+
+        local textFrame = btn:CreateFontString(nil, "OVERLAY")
+        textFrame:SetFont(QF.default.font, 10, "OUTLINE")
+        textFrame:SetPoint("CENTER")
+        textFrame:SetWidth(0)
+        textFrame:SetText('Delete')
+        textFrame:SetVertexColor(0.52, 0, 0.04, 1)
+        btn.text = textFrame
+
+        local hoverContainer = CreateFrame('Frame', nil, btn)
+        hoverContainer:SetAllPoints()
+        local hoverBorder = hoverContainer:CreateTexture()
+        hoverContainer.border = hoverBorder
+        btn.hoverContainer = hoverContainer
+        hoverContainer:SetFrameLevel(btn:GetFrameLevel() - 1)
+        hoverBorder:SetTexture(QF.default.barBg)
+        hoverBorder:SetPoint("TOPLEFT", 0, 8)
+        hoverBorder:SetPoint("BOTTOMRIGHT", 0, -8)
+        hoverContainer:SetAlpha(0)
+        btn.animDur = 0.15
+        btn.onHover = QF.utils.animation.fade(hoverContainer, btn.animDur, 0, 1)
+        btn.onHoverLeave = QF.utils.animation.fade(hoverContainer, btn.animDur, 1, 0)
+        hoverBorder:SetVertexColor(0.52, 0, 0.04, 1)
+
+        btn:SetScript('OnLeave', function(self)
+            self.onHoverLeave:Play()
+            self.text:SetVertexColor(0.52, 0, 0.04, 1)
+            self.text:SetFont(QF.default.font, 10, "OUTLINE")
+        end)
+        btn:SetScript('OnEnter', function(self)
+            self.onHover:Play()
+            self.text:SetVertexColor(1, 1, 1, 1)
+            self.text:SetFont(QF.default.font, 10, "NONE")
+        end)
+        btn:SetScript('OnClick', function()
+            f.onDelete()
+        end)
+
+        btn:SetPoint('BOTTOMRIGHT', -12, 5)
+    end
 end
 
 local function AddOptionBody(f)
@@ -285,7 +338,7 @@ local function ConfigureFrame(f)
 
         f.SetTag = function(_, tagType)
             tag:SetText(tagType)
-            tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
+            tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType] or { 0.44, 0, 0.94 }))
         end
 
         f:Observe("data", function(data)
@@ -329,11 +382,15 @@ local function ConfigureFrame(f)
     f.created = true
 end
 
-optionContainer.CreateOption = function(self, data)
+optionContainer.CreateOption = function(self, data, onDelete)
     local frame = self.pool:Acquire()
     ConfigureFrame(frame)
 
     frame:SetValue("data", data)
+    frame.onDelete = onDelete
+    if (not data.type) then
+        frame:SetValue('isOpen', true)
+    end
     return frame
 end
 

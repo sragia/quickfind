@@ -3,7 +3,7 @@ local _, QF = ...
 QF.utils = {
     suggestMatch = function(userInput, source)
         local suggestions = {}
-        for _, data in ipairs(source) do
+        for _, data in pairs(source) do
             local matchinString = data.name .. ',' .. data.tags
             local matchStart, matchEnd = string.find(string.lower(matchinString), string.lower(userInput), 1, true)
             if matchStart ~= nil then
@@ -72,6 +72,16 @@ QF.utils = {
                 return keys[i], t[keys[i]]
             end
         end
+    end,
+    generateNewId = function(length)
+        local randCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        length = length or 10
+        local output = ""
+        for i = 1, length do
+            local rand = math.random(#randCharSet)
+            output = output .. string.sub(randCharSet, rand, rand)
+        end
+        return not QF.data[output] and output or QF.utils.generateNewId(length)
     end,
     animation = {
         fade = function(f, duration, from, to, ag)

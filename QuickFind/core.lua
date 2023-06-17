@@ -33,21 +33,24 @@ local function init()
         -- TODO: Remove before release
         QF.data = {}
         for _, optionData in ipairs(QF.BASE_LOOKUPS) do
+            optionData.created = time()
             QF.data[optionData.id] = optionData
         end
     end
 end
 
 QF.SaveData = function(self, id, data)
-    if (self.data[id]) then
-        self.data[id] = data
-    end
+    self.data[id] = data
 end
 
 QF.SaveDataByKey = function(self, id, key, data)
     if (self.data[id]) then
         self.data[id][key] = data
     end
+end
+
+QF.DeleteByKey = function(self, id)
+    self.data[id] = nil
 end
 
 QF.handler:RegisterEvent("ADDON_LOADED")
