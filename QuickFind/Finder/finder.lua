@@ -10,7 +10,7 @@ finder.init = function(self)
 end
 
 finder.ShowFinder = function(self)
-    if (self.finderFrame) then
+    if (self.finderFrame and not InCombatLockdown()) then
         self.editBox:SetText('')
         self.container:Show()
         self.container.fadeIn:Play()
@@ -33,6 +33,7 @@ end
 finder.CreateSearchBox = function(self)
     local finderFrame = CreateFrame("Frame", 'QFFinder', UIParent)
     self.finderFrame = finderFrame
+
     finderFrame:SetPropagateKeyboardInput(true)
     finderFrame:SetScript("OnKeyDown", function(_, key)
         if (key == "P" and IsControlKeyDown()) then
@@ -44,6 +45,12 @@ finder.CreateSearchBox = function(self)
     finderFrame:SetWidth(1)
 
     self.container = CreateFrame("Frame", nil, finderFrame)
+    self.container:RegisterEvent('PLAYER_REGEN_DISABLED')
+    self.container:SetScript('OnEvent', function(self, event)
+        if (event == 'PLAYER_REGEN_DISABLED') then
+            self:Hide()
+        end
+    end)
     self.container:SetAllPoints()
     self.container:Hide()
     self.container.fadeIn = QF.utils.animation.fade(self.container, 0.2, 0, 1)

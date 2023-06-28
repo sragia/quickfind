@@ -11,14 +11,22 @@ suggestions.init = function(self)
     -- Suggestion Pool
     self.buttonPool = CreateFramePool('BUTTON', self.suggestionContainer, "SecureActionButtonTemplate")
 
+    self.suggestionContainer:RegisterEvent('PLAYER_REGEN_DISABLED')
+    self.suggestionContainer:SetScript('OnEvent', function(self, event)
+        if (event == 'PLAYER_REGEN_DISABLED') then
+            self:Hide()
+        end
+    end)
+
     -- Hide/Show Animations
     self.suggestionContainer.fadeIn = QF.utils.animation.fade(self.suggestionContainer, 0.2, 0, 1)
     self.suggestionContainer.fadeOut = QF.utils.animation.fade(self.suggestionContainer, 0.2, 1, 0.3)
-    self.suggestionContainer.fadeOut:SetScript('OnFinished',
-        function()
+    self.suggestionContainer.fadeOut:SetScript('OnFinished', function()
+        if (not InCombatLockdown()) then
             self.suggestionContainer:Hide()
             self.buttonPool:ReleaseAll()
-        end)
+        end
+    end)
     QF.utils.animation.diveIn(self.suggestionContainer, 0.2, 0, 20, 'IN', self.suggestionContainer.fadeIn)
     QF.utils.animation.diveIn(self.suggestionContainer, 0.2, 0, -20, 'OUT', self.suggestionContainer.fadeOut)
 
@@ -32,7 +40,7 @@ suggestions.Hide = function(self)
 end
 
 suggestions.Show = function(self)
-    if (self.suggestionContainer) then
+    if (self.suggestionContainer and not InCombatLockdown()) then
         local left, bottom = finder.editBox:GetRect()
         local scale = finder.container:GetScale()
         self.suggestionContainer:SetScale(scale)
