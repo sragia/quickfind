@@ -7,9 +7,12 @@ local suggestions = QF:GetModule(moduleName)
 suggestions.init = function(self)
     self.suggestionContainer = CreateFrame('Frame', 'QFSuggestionsContainer', UIParent)
     self.suggestionContainer:SetSize(1, 1)
+    self.suggestionContainer:SetFrameStrata("DIALOG")
 
     -- Suggestion Pool
     self.buttonPool = CreateFramePool('BUTTON', self.suggestionContainer, "SecureActionButtonTemplate")
+
+    self.secureButton = CreateFrame("Button", "QuickFindSuggestion", UIParent, "SecureActionButtonTemplate")
 
     self.suggestionContainer:RegisterEvent('PLAYER_REGEN_DISABLED')
     self.suggestionContainer:SetScript('OnEvent', function(self, event)
@@ -35,6 +38,7 @@ end
 
 suggestions.Hide = function(self)
     if (self.suggestionContainer) then
+        self:ClearBindings()
         self.suggestionContainer.fadeOut:Play()
     end
 end
@@ -53,6 +57,7 @@ end
 suggestions.Refresh = function(self, value)
     local suggestions = QF.utils.suggestMatch(value, QF.data)
     self.buttonPool:ReleaseAll()
+    self.activeButtons = {}
     for index, suggestion in ipairs(suggestions) do
         if (index > QF.default.maxSuggestions) then
             break
@@ -62,19 +67,32 @@ suggestions.Refresh = function(self, value)
         self:ConfigureFrame(f)
         f.index = index
         f.suggestion = suggestion
-        self:SetOnClick(f, suggestion)
+        f.selected = index == 1
+        f:SetSelected(index == 1, true)
         f:init()
         f:Show()
 
+
         f:SetPoint("TOPLEFT", self.suggestionContainer, "BOTTOMLEFT", 0, ((index - 1) * -32) - 15)
+        table.insert(self.activeButtons, f)
+    end
+end
+
+suggestions.GetSelected = function(self)
+    for _, frame in ipairs(self.activeButtons) do
+        if (frame.selected) then
+            return frame
+        end
     end
 end
 
 suggestions.ConfigureFrame = function(self, frame)
     frame:SetSize(320, 26)
+    frame:SetFrameStrata('DIALOG')
     frame.hoverColor = { 1, 0.84, 0, 1 }
     frame.isDisabledColor = { 0.30, 0.30, 0.30, 1 }
     frame.isDisabled = false
+    frame.attributes = {}
 
     if (not frame.bg) then
         -- BG
@@ -161,7 +179,6 @@ suggestions.ConfigureFrame = function(self, frame)
         hoverBorder:SetPoint('CENTER', -30)
         hoverBorder:SetHeight(75)
         hoverBorder:SetWidth(350)
-        hoverContainer:SetAlpha(0)
         frame.animDur = 0.15
         frame.onHover = QF.utils.animation.fade(hoverContainer, frame.animDur, 0, 1)
         frame.onHoverLeave = QF.utils.animation.fade(hoverContainer, frame.animDur, 1, 0)
@@ -170,6 +187,7 @@ suggestions.ConfigureFrame = function(self, frame)
         end
         frame:SetHoverColor()
     end
+    frame.hoverContainer:SetAlpha(0)
 
     if (not frame.cdText) then
         local cdText = frame:CreateFontString(nil, "OVERLAY")
@@ -228,6 +246,7 @@ suggestions.ConfigureFrame = function(self, frame)
 
     frame.SetSelected = function(self, value, noAnim)
         if (value) then
+            suggestions:SetOnClick(self, self.suggestion)
             if (noAnim) then
                 self.hoverContainer:SetAlpha(1)
                 self:SetTextColor(unpack(self.hoverColor))
@@ -235,7 +254,6 @@ suggestions.ConfigureFrame = function(self, frame)
                 self.onHover:Play()
                 C_Timer.After(self.animDur / 2, function() frame:SetTextColor(unpack(self.hoverColor)) end)
             end
-            _G['QFSelectedSuggestion'] = self
         else
             if (noAnim) then
                 self.hoverContainer:SetAlpha(0)
@@ -257,7 +275,6 @@ suggestions.ConfigureFrame = function(self, frame)
                 )
             end
         end
-
         self.selected = value
     end
 
@@ -270,8 +287,17 @@ suggestions.ConfigureFrame = function(self, frame)
         self:SetDesatured(true)
     end
 
+
     frame:SetScript("OnEnter", function(self) self:SetSelected(true) end)
     frame:SetScript("OnLeave", function(self) self:SetSelected(false) end)
+    frame:SetScript("OnAttributeChanged", function(self, key, value) self.attributes[key] = true end)
+
+
+    frame.ClearSecure = function(self)
+        for key, _ in pairs(self.attributes) do
+            self:SetAttribute(key, nil)
+        end
+    end
 
     frame.init = function(self)
         local data = self.suggestion.data
@@ -294,18 +320,49 @@ suggestions.ConfigureFrame = function(self, frame)
     end
 end
 
-suggestions.SetOnClick = function(self, frame, suggestion)
-    if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
-        frame:SetAttribute("type", "item")
-        local itemName = GetItemInfo(suggestion.data.itemId)
-        frame:SetAttribute("item", itemName)
-    elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
-        frame:SetAttribute("type", "spell")
-        frame:SetAttribute("spell", suggestion.data.spellId)
+suggestions.ClearBindings = function(self)
+    ClearOverrideBindings(self.suggestionContainer)
+end
+
+suggestions.SelectNext = function(self, reverse)
+    local foundSelected = false
+    self.activeButtons = self.activeButtons or {}
+    for i = (reverse and #self.activeButtons or 1), (reverse and 1 or #self.activeButtons), reverse and -1 or 1 do
+        local frame = self.activeButtons[i]
+        if (frame.selected) then
+            foundSelected = true
+            frame:SetSelected(false)
+        elseif (not frame.selected and foundSelected) then
+            foundSelected = false
+            frame:SetSelected(true)
+        end
     end
-    frame:SetScript("PostClick", function()
-        finder:HideFinder()
-    end)
+
+    if (foundSelected) then
+        -- selected is last one, select first
+        self.activeButtons[reverse and #self.activeButtons or 1]:SetSelected(true)
+    end
+end
+
+suggestions.SetOnClick = function(self, frame, suggestion)
+    for _, frame in ipairs({ frame, self.secureButton }) do
+        if (frame.ClearSecure) then
+            frame:ClearSecure()
+        end
+        if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
+            frame:SetAttribute("type", "item")
+            local itemName = GetItemInfo(suggestion.data.itemId)
+            frame:SetAttribute("item", itemName)
+        elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
+            frame:SetAttribute("type", "spell")
+            frame:SetAttribute("spell", suggestion.data.spellId)
+        end
+        frame:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+        frame:SetScript("PostClick", function()
+            finder:HideFinder()
+        end)
+    end
+    SetOverrideBindingClick(self.suggestionContainer, true, "ENTER", self.secureButton:GetName(), "LeftButton")
 end
 
 suggestions.AttachToEditBox = function(self)

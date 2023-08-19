@@ -8,6 +8,18 @@
         "SlashCmdList",
         "Add",
         "ScrollBoxListMixin",
-        "ScrollBoxMixin"
+        "ScrollBoxMixin",
+        "ExecuteFrameScript",
+        "CreateDataProvider",
+        "ButtonFrameTemplate_HidePortrait",
+        "ScrollUtil",
+        "CreateScrollBoxListLinearView",
+        "CooldownFrame_Set",
+        "CooldownFrame_Clear",
+        "MouseIsOver",
+        "ITEM_QUALITY_COLORS",
+        "CharacterMicroButton",
+        "BOOKTYPE_SPELL",
+        "GenerateClosure"
     ]
 }

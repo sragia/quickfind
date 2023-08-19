@@ -92,6 +92,14 @@ finder.CreateEditBox = function(self)
 
 
     -- Base logic
+    editBox:SetScript("OnKeyDown", function(self, key)
+        self:SetPropagateKeyboardInput(key == "ENTER")
+        if (key == "TAB" or key == "DOWN") then
+            suggestions:SelectNext()
+        elseif (key == "UP") then
+            suggestions:SelectNext(true)
+        end
+    end)
     editBox:SetScript("OnEscapePressed", function()
         self:HideFinder()
     end)
