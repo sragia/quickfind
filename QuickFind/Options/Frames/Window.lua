@@ -169,8 +169,11 @@ local configureFrame = function(frame)
         container:SetPoint("BOTTOMRIGHT", -30, 30)
     end
 
-    frame.ShowSettingsBtn = function(self, show)
+    frame.ShowSettingsBtn = function(self, show, onSettingsClick)
         self:SetCloseStyle(show)
+        if (onSettingsClick) then
+            self.settingBtn:SetScript("OnMouseUp", onSettingsClick)
+        end
         if (show) then
             self.settingBtn:Show()
         end
@@ -178,11 +181,18 @@ local configureFrame = function(frame)
 end
 
 
-window.getFrame = function(self, title, showSettings)
+window.getFrame = function(self, config)
     local f = window.pool:Acquire()
     configureFrame(f)
-    f:ShowSettingsBtn(showSettings)
+    f:ShowSettingsBtn(config.showSettings, config.onSettingsClick)
+    if (config.frameLevel) then
+        f:SetFrameLevel(config.frameLevel)
+    end
 
-    f:SetTitle(title)
+    if (config.offset) then
+        f:SetPoint("CENTER", config.offset.x, config.offset.y)
+    end
+
+    f:SetTitle(config.title)
     return f
 end

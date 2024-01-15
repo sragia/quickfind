@@ -20,6 +20,8 @@
         "ITEM_QUALITY_COLORS",
         "CharacterMicroButton",
         "BOOKTYPE_SPELL",
-        "GenerateClosure"
+        "GenerateClosure",
+        "show",
+        "Settings"
     ]
 }

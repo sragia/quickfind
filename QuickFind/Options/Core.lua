@@ -5,9 +5,19 @@ local options = QF:GetModule(moduleName)
 -- Frames
 local window = QF:GetModule('frame-window')
 local optionContainer = QF:GetModule('frame-option-container')
+local textInput = QF:GetModule('frame-input-text')
 
 options.init = function(self)
-    local windowFrame = window:getFrame('Configuration', true)
+    local settingsFrame = window:getFrame({ title = 'Settings', showSettings = false, frameLevel = 50, offset = { x = 400, y = 200 } })
+    self.settings = settingsFrame
+    local windowFrame = window:getFrame({
+        title = 'Configuration',
+        showSettings = true,
+        onSettingsClick = function()
+            settingsFrame:ShowWindow()
+        end,
+        frameLevel = 10
+    })
     self.window = windowFrame
 
     if (not windowFrame.scrollFrame) then
@@ -101,6 +111,7 @@ options.init = function(self)
 
     self:CreateSearchInput()
     self:PopulateOptions()
+    self:PopulateSettings()
 end
 
 options.OnDelete = function(id)
@@ -192,6 +203,18 @@ options.CreateSearchInput = function(self)
     editBox:SetScript("OnEscapePressed", function()
         editBox:ClearFocus()
     end)
+end
+
+options.PopulateSettings = function(self)
+    local sFrame = self.settings
+
+    if (not sFrame.scaleInput) then
+        local scaleInput = textInput:Get({
+            label = 'Search Scale',
+            initial = QF.default.scale
+        }, sFrame.container)
+        scaleInput:SetPoint("TOPLEFT", 20, 0)
+    end
 end
 
 options.ShowFrame = function(self)
