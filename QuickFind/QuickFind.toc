@@ -1,9 +1,11 @@
 ## Interface: 100005
 ## Title: QuickFind
-## Notes: Shows various information about your characters
+## Notes: Quickly find action you want to take
 ## Author: Exality
 ## SavedVariables: QuickFindData
 ## Version: @project-version@
+## X-Wago-ID: 5NRe15G3
+## X-Curse-Project-ID: 962412
 
 Init.lua
 Util.lua
