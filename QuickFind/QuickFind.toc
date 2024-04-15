@@ -1,4 +1,4 @@
-## Interface: 100005
+## Interface: 100206
 ## Title: QuickFind
 ## Notes: Quickly find action you want to take
 ## Author: Exality
