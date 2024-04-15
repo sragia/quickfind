@@ -59,7 +59,7 @@ suggestions.Refresh = function(self, value)
     self.buttonPool:ReleaseAll()
     self.activeButtons = {}
     for index, suggestion in ipairs(suggestions) do
-        if (index > QF.default.maxSuggestions) then
+        if (index > QF.settings.maxSuggestions) then
             break
         end
         local f = self.buttonPool:Acquire()

@@ -211,9 +211,29 @@ options.PopulateSettings = function(self)
     if (not sFrame.scaleInput) then
         local scaleInput = textInput:Get({
             label = 'Search Scale',
-            initial = QF.default.scale
+            initial = QF.settings.scale
         }, sFrame.container)
+        scaleInput.onChange = function(value)
+            if (tonumber(value)) then
+                QF.settings:SetValue('scale', tonumber(value));
+            end
+        end
         scaleInput:SetPoint("TOPLEFT", 20, 0)
+        sFrame.scaleInput = scaleInput
+    end
+
+    if (not sFrame.maxSuggestions) then
+        local maxSuggestions = textInput:Get({
+            label = 'Max Available Suggestions',
+            initial = QF.settings.maxSuggestions
+        }, sFrame.container)
+        maxSuggestions.onChange = function(value)
+            if (tonumber(value)) then
+                QF.settings:SetValue('maxSuggestions', tonumber(value));
+            end
+        end
+        maxSuggestions:SetPoint("TOPLEFT", sFrame.scaleInput, 'TOPRIGHT', 20, 0)
+        sFrame.maxSuggestions = maxSuggestions
     end
 end
 

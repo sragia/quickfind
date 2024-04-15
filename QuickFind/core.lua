@@ -30,13 +30,15 @@ end
 
 local function init()
     if not QF.data or next(QF.data) == nil then
-        -- TODO: Remove before release
         QF.data = {}
         for _, optionData in ipairs(QF.BASE_LOOKUPS) do
             optionData.created = time()
             QF.data[optionData.id] = optionData
         end
     end
+
+    QF.utils.addObserver(QF.settings)
+    -- Add Any setting changes here
 end
 
 QF.SaveData = function(self, id, data)
@@ -53,18 +55,28 @@ QF.DeleteByKey = function(self, id)
     self.data[id] = nil
 end
 
+QF.settings = {
+    scale = QF.default.scale,
+    maxSuggestions = QF.default.maxSuggestions
+}
+
 QF.handler:RegisterEvent("ADDON_LOADED")
 QF.handler:RegisterEvent("PLAYER_LOGOUT")
-QF.handler:SetScript("OnEvent", function(self, event, arg1)
+QF.handler:SetScript("OnEvent", function(_, event, arg1)
     if (event == "ADDON_LOADED" and arg1 == addonName) then
-        QF.data = QuickFindData
+        QF.data = QuickFindData.data or QF.data
+        QF.settings = QF.utils.tableMerge(QF.settings, QuickFindData.settings or {})
+        QFGLOBAL = QF
         init()
         QF:InitModules()
     end
     if event == "PLAYER_LOGOUT" then
         -- save things
         if QF.data and next(QF.data) ~= nil then
-            QuickFindData = QF.data
+            QuickFindData = QuickFindData or {}
+            QuickFindData.data = QF.data
+            QF.settings.observable = nil
+            QuickFindData.settings = QF.settings
         end
         return
     end

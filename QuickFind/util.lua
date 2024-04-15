@@ -156,8 +156,15 @@ QF.utils = {
 
         t.observable = {}
         t.Observe = function(_, key, onChangeFunc)
-            t.observable[key] = t.observable[key] or {}
-            table.insert(t.observable[key], onChangeFunc)
+            if (type(key) == 'table') then
+                for _, k in ipairs(key) do
+                    t.observable[k] = t.observable[k] or {}
+                    table.insert(t.observable[k], onChangeFunc)
+                end
+            else
+                t.observable[key] = t.observable[key] or {}
+                table.insert(t.observable[key], onChangeFunc)
+            end
         end
         t.SetValue = function(_, key, value)
             t[key] = value
@@ -169,5 +176,23 @@ QF.utils = {
         end
 
         return t
+    end,
+    tableMerge = function(t1, t2, rewriteArrays)
+        for k, v in pairs(t2) do
+            if type(v) == "table" then
+                if type(t1[k] or false) == "table" then
+                    if (rewriteArrays and isArray(t2[k])) then
+                        t1[k] = v
+                    else
+                        tableMerge(t1[k] or {}, t2[k] or {}, rewriteArrays)
+                    end
+                else
+                    t1[k] = v
+                end
+            else
+                t1[k] = v
+            end
+        end
+        return t1
     end
 }
