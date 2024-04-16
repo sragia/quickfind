@@ -364,6 +364,9 @@ suggestions.SetOnClick = function(self, frame, suggestion)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
             frame:SetAttribute("type", "spell")
             frame:SetAttribute("spell", suggestion.data.spellId)
+        elseif (suggestion.data.type == QF.LOOKUP_TYPE.MOUNT) then
+            frame:SetAttribute("type", "spell")
+            frame:SetAttribute("spell", suggestion.data.mountName)
         end
         frame:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
         frame:SetScript("PostClick", function()

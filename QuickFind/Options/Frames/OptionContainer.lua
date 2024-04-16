@@ -13,6 +13,7 @@ local typeOptions = {
     [QF.LOOKUP_TYPE.SPELL] = 'Spell',
     [QF.LOOKUP_TYPE.TOY] = 'Toy',
     [QF.LOOKUP_TYPE.ITEM] = 'Item',
+    [QF.LOOKUP_TYPE.MOUNT] = 'Mount'
 }
 
 optionContainer.init = function(self)
@@ -132,6 +133,26 @@ local function AddOptions(f, data)
     end
     bodyFrame.spellId.onChange = onValueChange(data.id, 'spellId', f)
     bodyFrame.spellId.editBox:SetText(data.spellId or '')
+
+    if not bodyFrame.mountName then
+        local input = textInput:Get({
+            label = 'Mount Name',
+            initial = data.mountName
+        }, bodyFrame);
+        bodyFrame.mountName = input
+        table.insert(f.inputTypes, {
+            frame = input,
+            order = 5,
+            depends = function(data)
+                if (data.type ~= QF.LOOKUP_TYPE.MOUNT) then
+                    return false
+                end
+                return true
+            end
+        })
+    end
+    bodyFrame.mountName.onChange = onValueChange(data.id, 'mountName', f)
+    bodyFrame.mountName.editBox:SetText(data.mountName or '')
 
     if not bodyFrame.icon then
         local input = textInput:Get({
