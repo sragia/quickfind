@@ -35,12 +35,9 @@ finder.CreateSearchBox = function(self)
     local finderFrame = CreateFrame("Frame", 'QFFinder', UIParent)
     self.finderFrame = finderFrame
 
-    finderFrame:SetPropagateKeyboardInput(true)
-    finderFrame:SetScript("OnKeyDown", function(_, key)
-        if (key == "P" and IsControlKeyDown()) then
-            self:ShowFinder()
-        end
-    end)
+    QuickFind.OpenSuggestions = function()
+        self:ShowFinder()
+    end
     finderFrame:SetPoint("TOP", UIParent, "TOP", 0, -200)
     finderFrame:SetHeight(1)
     finderFrame:SetWidth(1)
