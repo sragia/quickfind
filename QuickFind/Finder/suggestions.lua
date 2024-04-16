@@ -230,6 +230,8 @@ suggestions.ConfigureFrame = function(self, frame)
         local onCD = setCDText()
         if (onCD) then
             frame.elapsed = 0
+            frame:SetDisabled(true)
+            frame:SetTextColor(unpack(frame.isDisabledColor))
             frame:SetScript("OnUpdate", function(self, elapsed)
                 self.elapsed = self.elapsed + elapsed
                 if (self.elapsed >= 1) then
@@ -242,6 +244,8 @@ suggestions.ConfigureFrame = function(self, frame)
                 end
             end)
         end
+
+        return onCD
     end
 
     frame.SetSelected = function(self, value, noAnim)
@@ -278,9 +282,11 @@ suggestions.ConfigureFrame = function(self, frame)
         self.selected = value
     end
 
-    frame.SetDisabled = function(self)
+    frame.SetDisabled = function(self, noText)
         self.isDisabled = true
-        self.notAvailable:Show()
+        if (not noText) then
+            self.notAvailable:Show()
+        end
         self.hoverColor = { 0.54, 0.54, 0.54, 1 }
         self:SetTextColor(unpack(self.isDisabledColor))
         self:SetHoverColor()
@@ -304,17 +310,19 @@ suggestions.ConfigureFrame = function(self, frame)
         self:SetText(data.name)
         self:SetIcon(data.icon)
         self:SetTag(data.type)
-        self:HandleCD(data)
         self:SetHoverColor()
         self:SetTextColor(1, 1, 1, 1)
+        local onCD = self:HandleCD(data)
 
-        if (data.type == QF.LOOKUP_TYPE.SPELL) then
-            if (not IsSpellKnown(data.spellId)) then
-                self:SetDisabled()
-            end
-        elseif (data.type == QF.LOOKUP_TYPE.ITEM) then
-            if (GetItemCount(data.itemId) <= 0) then
-                self:SetDisabled()
+        if (not onCD) then
+            if (data.type == QF.LOOKUP_TYPE.SPELL) then
+                if (not IsSpellKnown(data.spellId)) then
+                    self:SetDisabled()
+                end
+            elseif (data.type == QF.LOOKUP_TYPE.ITEM) then
+                if (GetItemCount(data.itemId) <= 0) then
+                    self:SetDisabled()
+                end
             end
         end
     end
