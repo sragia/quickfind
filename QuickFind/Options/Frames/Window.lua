@@ -17,6 +17,7 @@ local configureFrame = function(frame)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetClampedToScreen(true)
     frame:SetFrameStrata("DIALOG")
+    frame:SetResizable(true)
 
     frame.fadeIn = QF.utils.animation.fade(frame, 0.2, 0, 1)
     frame.fadeOut = QF.utils.animation.fade(frame, 0.2, 1, 0)
@@ -33,12 +34,24 @@ local configureFrame = function(frame)
         self.fadeOut:Play()
     end
 
-    if (not frame.bg) then
+    if (not frame.Texture) then
         local bg = frame:CreateTexture()
-        frame.bg = bg
+        frame.Texture = bg
         bg:SetTexture(QF.default.windowBg)
         bg:SetVertexColor(0, 0, 0, 0.6)
+        bg:SetTextureSliceMargins(35, 35, 35, 35)
+        bg:SetTextureSliceMode(Enum.UITextureSliceMode.Tiled)
         bg:SetAllPoints()
+    end
+
+    if (not frame.resizeBtn) then
+        local resizeBtn = CreateFrame("Button", nil, frame, "PanelResizeButtonTemplate");
+        frame.resizeBtn = resizeBtn
+        resizeBtn:SetPoint("BOTTOM")
+        resizeBtn:SetSize(40, 10)
+        resizeBtn:SetNormalTexture(QF.default.expandBtn)
+        resizeBtn:SetHighlightTexture(QF.default.expandBtnHighlight)
+        resizeBtn:Init(frame, 1000, 500, 1000, 1200);
     end
 
 
@@ -57,7 +70,7 @@ local configureFrame = function(frame)
     if (not frame.logo) then
         local logo = CreateFrame('Frame', nil, frame)
         logo:SetSize(99, 34)
-        logo:SetPoint("TOPLEFT", frame, 12, -14.5)
+        logo:SetPoint("TOPLEFT", frame, 11, -13.5)
         frame.logo = logo
 
         local bg = logo:CreateTexture()
@@ -76,7 +89,7 @@ local configureFrame = function(frame)
     if (not frame.close) then
         local closeContainer = CreateFrame("Button", nil, frame)
         closeContainer:SetSize(44, 34)
-        closeContainer:SetPoint("TOPRIGHT", -12, -15)
+        closeContainer:SetPoint("TOPRIGHT", -10, -13)
 
         local withSettings = closeContainer:CreateTexture(nil, "BACKGROUND")
         withSettings:SetTexture(QF.default.closeWithSettings)
@@ -129,7 +142,7 @@ local configureFrame = function(frame)
     if (not frame.settingBtn) then
         local settingContainer = CreateFrame("Button", nil, frame)
         settingContainer:SetSize(99, 36)
-        settingContainer:SetPoint("TOPRIGHT", -54, -15)
+        settingContainer:SetPoint("TOPRIGHT", -52, -13)
         frame.settingBtn = settingContainer
 
 
