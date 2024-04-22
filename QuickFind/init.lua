@@ -1,6 +1,7 @@
 local _, QF = ...
 
-QuickFind = {};
+QuickFind = {}
+QuickFindData = {}
 
 QF.LOOKUP_TYPE = {
     SPELL = 'SPELL',
