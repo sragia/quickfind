@@ -367,6 +367,10 @@ suggestions.SetOnClick = function(self, frame, suggestion)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.MOUNT) then
             frame:SetAttribute("type", "spell")
             frame:SetAttribute("spell", suggestion.data.mountName)
+        elseif (suggestion.data.type == QF.LOOKUP_TYPE.LUA) then
+            frame:SetScript('OnMouseDown', function()
+                loadstring(suggestion.data.lua)()
+            end)
         end
         frame:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
         frame:SetScript("PostClick", function()

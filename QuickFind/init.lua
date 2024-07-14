@@ -7,7 +7,8 @@ QF.LOOKUP_TYPE = {
     SPELL = 'SPELL',
     TOY = 'TOY',
     ITEM = 'ITEM',
-    MOUNT = 'MOUNT'
+    MOUNT = 'MOUNT',
+    LUA = 'LUA'
 }
 
 QF.default = {
@@ -34,7 +35,8 @@ QF.default = {
         [QF.LOOKUP_TYPE.SPELL] = { 0.44, 0, 0.94 },
         [QF.LOOKUP_TYPE.ITEM] = { 0.04, 0.62, 0 },
         [QF.LOOKUP_TYPE.TOY] = { 0, 0.25, 0.62 },
-        [QF.LOOKUP_TYPE.MOUNT] = { 1, 0.7, 0 }
+        [QF.LOOKUP_TYPE.MOUNT] = { 1, 0.7, 0 },
+        [QF.LOOKUP_TYPE.LUA] = { 0.34, 0.34, 0.34 }
     }
 }
 

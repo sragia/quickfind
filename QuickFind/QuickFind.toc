@@ -7,6 +7,8 @@
 ## X-Wago-ID: 5NRe15G3
 ## X-Curse-Project-ID: 962412
 
+ForAllIndentsAndPurposes.lua
+
 Init.lua
 Util.lua
 Core.lua
@@ -14,6 +16,8 @@ Core.lua
 Options/Frames/Window.lua
 Options/Frames/Inputs/Text.lua
 Options/Frames/Inputs/Dropdown.lua
+Options/Frames/Inputs/Button.lua
+Options/Frames/Inputs/LuaEditor.lua
 
 Options/Frames/OptionContainer.lua
 Options/Core.lua

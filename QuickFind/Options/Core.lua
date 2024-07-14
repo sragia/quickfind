@@ -21,15 +21,20 @@ options.init = function(self)
     self.window = windowFrame
 
     if (not windowFrame.scrollFrame) then
-        local scrollFrame = CreateFrame("ScrollFrame", nil, windowFrame.container, "ScrollBoxBaseTemplate")
+        local scrollFrame = CreateFrame("ScrollFrame", nil, windowFrame.container, "ScrollFrameTemplate")
         Mixin(scrollFrame, ScrollBoxMixin)
+        -- Hack to bypass need of creating view
+        scrollFrame.view = {
+            GetPanExtent = function()
+                return 0
+            end
+        }
         scrollFrame:SetPoint("TOPLEFT", 0, -60)
-        scrollFrame:SetPoint("BOTTOMRIGHT", 0, 50)
-
+        scrollFrame:SetPoint("BOTTOMRIGHT", -20, 50)
         local scrollChild = CreateFrame("Frame")
         scrollFrame:SetScrollChild(scrollChild)
-        scrollChild:SetWidth(windowFrame.container:GetWidth())
-        scrollChild:SetHeight(1)
+        scrollChild:SetWidth(windowFrame.container:GetWidth() - 20)
+        scrollChild:SetHeight(windowFrame.container:GetHeight())
         scrollFrame.child = scrollChild
 
         scrollFrame.GetBottomScrollValue = function(self)

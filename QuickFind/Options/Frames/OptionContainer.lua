@@ -3,9 +3,13 @@ local moduleName = 'frame-option-container'
 
 local optionContainer = QF:GetModule(moduleName)
 
+local windowCreator = QF:GetModule('frame-window')
+
 -- Inputs
 local textInput = QF:GetModule('frame-input-text')
 local dropdown = QF:GetModule('frame-input-dropdown')
+local button = QF:GetModule('frame-input-button')
+local luaEditor = QF:GetModule('frame-input-lua')
 
 local optionHeight, optionHeightOpen = 50, 170
 
@@ -13,7 +17,8 @@ local typeOptions = {
     [QF.LOOKUP_TYPE.SPELL] = 'Spell',
     [QF.LOOKUP_TYPE.TOY] = 'Toy',
     [QF.LOOKUP_TYPE.ITEM] = 'Item',
-    [QF.LOOKUP_TYPE.MOUNT] = 'Mount'
+    [QF.LOOKUP_TYPE.MOUNT] = 'Mount',
+    [QF.LOOKUP_TYPE.LUA] = 'Lua Script'
 }
 
 optionContainer.init = function(self)
@@ -38,6 +43,54 @@ local onValueChange = function(id, key, f)
     end
 end
 
+local function getLuaEditorWindow(value)
+    local window = windowCreator:getFrame({
+        offset = { x = 100, y = 50 },
+        showSettings = false,
+        title = 'Lua editor',
+        frameLevel = 9999,
+    });
+
+    local editor = luaEditor:Get({
+        text = value or ""
+    }, window.container)
+
+    window.editor = editor
+    editor:SetPoint("TOPLEFT")
+    editor:SetPoint("BOTTOMRIGHT", -25, 60)
+    editor.input:SetSize(editor:GetSize())
+    local saveBtn = button:Get({
+        text = 'Save',
+        width = 100,
+        height = 50,
+        onClick = function()
+            if (window.onSave) then
+                window.onSave(editor:GetText())
+            end
+            window:HideWindow()
+        end
+    }, window.container)
+
+    saveBtn:SetPoint("BOTTOMRIGHT")
+
+    local cancelBtn = button:Get({
+        text = 'Cancel',
+        width = 100,
+        height = 50,
+        onClick = function()
+            window:HideWindow()
+        end
+    }, window.container)
+
+    cancelBtn:SetPoint("RIGHT", saveBtn, "LEFT", -20, 0)
+
+
+
+    window:ShowWindow()
+
+    return window
+end
+
 local function renderLayout(f, inputs)
     local previous
     local index = 0
@@ -50,7 +103,8 @@ local function renderLayout(f, inputs)
             if (index > 4 or index == 1) then
                 row = index > 4 and row + 1 or row
                 index = 1
-                input.frame:SetPoint("TOPLEFT", 20, row * -55 + -5)
+                local x = input.type == 'button' and 10 or 20
+                input.frame:SetPoint("TOPLEFT", x, row * -55 + -5)
             else
                 input.frame:SetPoint("TOPLEFT", previous, "TOPRIGHT", 25, 0)
             end
@@ -74,6 +128,7 @@ local function AddOptions(f, data)
         bodyFrame.type = input
         table.insert(f.inputTypes, {
             frame = input,
+            type = 'dropdown',
             order = 0
         })
     end
@@ -84,7 +139,6 @@ local function AddOptions(f, data)
         renderLayout(f, f.inputTypes)
     end
     bodyFrame.type.valueDisplay:SetText(data.type and typeOptions[data.type] or '')
-
 
     if not bodyFrame.name then
         local input = textInput:Get({
@@ -108,6 +162,7 @@ local function AddOptions(f, data)
         bodyFrame.tags = input
         table.insert(f.inputTypes, {
             frame = input,
+            type = 'text',
             order = 20
         })
     end
@@ -123,6 +178,7 @@ local function AddOptions(f, data)
         table.insert(f.inputTypes, {
             frame = input,
             order = 5,
+            type = 'text',
             depends = function(data)
                 if (data.type ~= QF.LOOKUP_TYPE.SPELL) then
                     return false
@@ -142,6 +198,7 @@ local function AddOptions(f, data)
         bodyFrame.mountName = input
         table.insert(f.inputTypes, {
             frame = input,
+            type = 'text',
             order = 5,
             depends = function(data)
                 if (data.type ~= QF.LOOKUP_TYPE.MOUNT) then
@@ -162,6 +219,7 @@ local function AddOptions(f, data)
         bodyFrame.icon = input
         table.insert(f.inputTypes, {
             frame = input,
+            type = 'text',
             order = 30,
         })
     end
@@ -177,6 +235,7 @@ local function AddOptions(f, data)
         table.insert(f.inputTypes, {
             frame = input,
             order = 5,
+            type = 'text',
             depends = function(data)
                 if (data.type ~= QF.LOOKUP_TYPE.ITEM and data.type ~= QF.LOOKUP_TYPE.TOY) then
                     return false
@@ -187,6 +246,27 @@ local function AddOptions(f, data)
     end
     bodyFrame.itemId.onChange = onValueChange(data.id, 'itemId', f)
     bodyFrame.itemId.editBox:SetText(data.itemId or '')
+
+    if not bodyFrame.luaEditorBtn then
+        local input = button:Get({
+            text = 'Open Editor',
+            onClick = function()
+                local window = getLuaEditorWindow(data.lua)
+                window.onSave = onValueChange(data.id, 'lua', f)
+            end
+        }, bodyFrame)
+        bodyFrame.luaEditorBtn = input
+        table.insert(f.inputTypes, {
+            frame = input,
+            order = 100,
+            type = 'button',
+            depends = function(data)
+                return data.type == QF.LOOKUP_TYPE.LUA
+            end
+        })
+    end
+
+
     renderLayout(f, f.inputTypes)
 
     if (not bodyFrame.deleteBtn) then
