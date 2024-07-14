@@ -4,7 +4,7 @@ QF.utils = {
     suggestMatch = function(userInput, source)
         local suggestions = {}
         for _, data in pairs(source) do
-            local matchinString = data.name .. ',' .. data.tags
+            local matchinString = (data.name or '') .. ',' .. (data.tags or '')
             local matchStart, matchEnd = string.find(string.lower(matchinString), string.lower(userInput), 1, true)
             if matchStart ~= nil then
                 table.insert(suggestions,

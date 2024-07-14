@@ -195,7 +195,6 @@ dropdown.Get = function(self, options, parent)
     input.Destroy = function(self)
         self.pool:Release(self)
     end
-    C_Timer.After(1, function() ViragDevTool_AddData(input); end)
     input:Show()
     return input
 end
