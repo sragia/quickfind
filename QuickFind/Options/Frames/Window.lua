@@ -89,7 +89,7 @@ local configureFrame = function(frame)
     if (not frame.close) then
         local closeContainer = CreateFrame("Button", nil, frame)
         closeContainer:SetSize(44, 34)
-        closeContainer:SetPoint("TOPRIGHT", -10, -13)
+        closeContainer:SetPoint("TOPRIGHT", -12, -15)
 
         local withSettings = closeContainer:CreateTexture(nil, "BACKGROUND")
         withSettings:SetTexture(QF.default.closeWithSettings)
@@ -142,7 +142,7 @@ local configureFrame = function(frame)
     if (not frame.settingBtn) then
         local settingContainer = CreateFrame("Button", nil, frame)
         settingContainer:SetSize(99, 36)
-        settingContainer:SetPoint("TOPRIGHT", -52, -13)
+        settingContainer:SetPoint("TOPRIGHT", -54, -15)
         frame.settingBtn = settingContainer
 
 

@@ -83,6 +83,7 @@ end
 local function ConfigureFrame(f, options)
     QF.utils.addObserver(f)
     f:SetSize(205, 70)
+    f:SetFrameStrata('TOOLTIP')
     f.isOpen = false
     f.onChange = options.onChange
     f.options = options.options
@@ -163,12 +164,12 @@ local function ConfigureFrame(f, options)
         self.onHover:Play()
     end)
     f:SetScript("OnLeave", function(self) self.onHoverLeave:Play() end)
-
     if (not f.optionContainer) then
-        local optionContainer = CreateFrame("Frame", nil, f)
+        local optionContainer = CreateFrame("Frame", nil, UIParent)
         optionContainer:SetHeight(1)
         optionContainer:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, 15)
         optionContainer:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", 0, 15)
+        optionContainer:SetFrameStrata("FULLSCREEN_DIALOG")
         optionContainer:SetFrameLevel(99)
         f.optionContainer = optionContainer
         optionContainer:Hide()
@@ -194,6 +195,7 @@ dropdown.Get = function(self, options, parent)
     input.Destroy = function(self)
         self.pool:Release(self)
     end
+    C_Timer.After(1, function() ViragDevTool_AddData(input); end)
     input:Show()
     return input
 end
