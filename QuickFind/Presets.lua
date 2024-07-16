@@ -2,7 +2,7 @@
 local QF = select(2, ...)
 local moduleName = 'presets'
 
----@class SpellDataItem : {spellID: number, name: string, iconID: string}
+---@class SpellDataItem : {spellID: number, name: string, iconID: string, description: string}
 
 ---@class Presets
 local presets = QF:GetModule(moduleName)
@@ -40,13 +40,30 @@ presets.getSpellData = function(self, spellID)
 
     if (C_Spell.IsSpellDataCached(spellID)) then
         local spellInfo = C_SpellBook.GetSpellInfo(spellID)
-        local spellData = {
-            spellID = spellID,
-            name = spellInfo.name,
-            iconID = spellInfo.iconID
-        }
-        cache:saveSpellData(spellID, spellData)
-        return spellData
+        local spellDescription = GetSpellDescription(spellID)
+        if (not spellDescription) then
+            local spell = Spell:CreateFromSpellID(spellID)
+            spell:ContinueOnSpellLoad(function()
+                local spellData = {
+                    spellID = spellID,
+                    name = spell:GetSpellName(),
+                    iconID = spellInfo.iconID,
+                    description = spell:GetSpellDescription()
+                }
+                cache:saveSpellData(spellID, spellData)
+                self:build()
+            end)
+            return false
+        else
+            local spellData = {
+                spellID = spellID,
+                name = spellInfo.name,
+                iconID = spellInfo.iconID,
+                description = spellDescription
+            }
+            cache:saveSpellData(spellID, spellData)
+            return spellData
+        end
     else
         local id = QF.utils.generateNewId(5)
         QF.handler:registerCallback('SPELL_DATA_LOAD_RESULT', id, self:spellCacheCallback(id))
@@ -79,7 +96,7 @@ presets.build = function(self)
                     name = spellData.name,
                     spellId = spellID,
                     type = QF.LOOKUP_TYPE.SPELL,
-                    tags = ''
+                    tags = spellData.description
                 }
             end
         end
