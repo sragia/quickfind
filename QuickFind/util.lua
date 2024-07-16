@@ -1,4 +1,5 @@
-local _, QF = ...
+---@class QF
+local QF = select(2, ...)
 
 QF.utils = {
     suggestMatch = function(userInput, source)

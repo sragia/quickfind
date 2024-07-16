@@ -7,20 +7,28 @@
 ## X-Wago-ID: 5NRe15G3
 ## X-Curse-Project-ID: 962412
 
+# Libraries
 ForAllIndentsAndPurposes.lua
 
+# Core Functionality
 Init.lua
 Util.lua
 Core.lua
+Cache.lua
 
+# Presets
+Presets/Portals.lua
+Presets.lua
+
+# Options
 Options/Frames/Window.lua
 Options/Frames/Inputs/Text.lua
 Options/Frames/Inputs/Dropdown.lua
 Options/Frames/Inputs/Button.lua
 Options/Frames/Inputs/LuaEditor.lua
-
 Options/Frames/OptionContainer.lua
 Options/Core.lua
 
+# Finder
 Finder/Finder.lua
 Finder/Suggestions.lua

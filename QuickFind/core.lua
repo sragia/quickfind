@@ -1,11 +1,35 @@
-local addonName, QF = ...
+local addonName = ...
+
+---@class QF
+local QF = select(2, ...)
 
 local initIndx = 0
 
 QF.modules = {}
 
+---@class Frame
 QF.handler = CreateFrame("FRAME")
+QF.handler.callbacks = {}
 
+---@param self Frame
+---@param event string
+---@param id string
+---@param func function
+QF.handler.registerCallback = function(self, event, id, func)
+    self.callbacks[event] = self.callbacks[event] or {}
+    self.callbacks[event][id] = func
+
+    return id
+end
+
+QF.handler.unregisterCallback = function(self, event, id)
+    self.callbacks[event][id] = nil
+end
+
+---Get module
+---@param self QF
+---@param id string
+---@return table
 QF.GetModule = function(self, id)
     if (not self.modules[id]) then
         initIndx = initIndx + 1
@@ -31,10 +55,6 @@ end
 local function init()
     if not QF.data or next(QF.data) == nil then
         QF.data = {}
-        for _, optionData in ipairs(QF.BASE_LOOKUPS) do
-            optionData.created = time()
-            QF.data[optionData.id] = optionData
-        end
     end
 
     QF.utils.addObserver(QF.settings)
@@ -62,19 +82,28 @@ QF.settings = {
 
 QF.handler:RegisterEvent("ADDON_LOADED")
 QF.handler:RegisterEvent("PLAYER_LOGOUT")
-QF.handler:SetScript("OnEvent", function(_, event, arg1)
-    if (event == "ADDON_LOADED" and arg1 == addonName) then
+QF.handler:SetScript("OnEvent", function(self, event, ...)
+    if (event == "ADDON_LOADED" and ... == addonName) then
         QF.data = QuickFindData.data or QF.data
         QF.settings = QF.utils.tableMerge(QF.settings, QuickFindData.settings or {})
+        QF.cache = QuickFindData.cache or QF.cache
         QFGLOBAL = QF
         init()
         QF:InitModules()
+    end
+    if self.callbacks[event] then
+        for _, func in ipairs(self.callbacks[event]) do
+            if (func) then
+                func(event, ...)
+            end
+        end
     end
     if event == "PLAYER_LOGOUT" then
         -- save things
         if QF.data and next(QF.data) ~= nil then
             QuickFindData = QuickFindData or {}
             QuickFindData.data = QF.data
+            QuickFindData.cache = QF.cache
             QF.settings.observable = nil
             QuickFindData.settings = QF.settings
         end
