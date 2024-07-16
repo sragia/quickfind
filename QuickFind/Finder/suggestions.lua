@@ -1,4 +1,6 @@
-local _, QF = ...
+---@class QF
+local QF = select(2, ...)
+
 local moduleName = 'suggestions'
 
 local finder = QF:GetModule('finder')
@@ -55,7 +57,7 @@ suggestions.Show = function(self)
 end
 
 suggestions.Refresh = function(self, value)
-    local suggestions = QF.utils.suggestMatch(value, QF.data)
+    local suggestions = QF.utils.suggestMatch(value, QF:getAllSuggestions())
     self.buttonPool:ReleaseAll()
     self.activeButtons = {}
     for index, suggestion in ipairs(suggestions) do

@@ -74,10 +74,10 @@ presets.build = function(self)
         for _, spellID in pairs(data.data) do
             local spellData = self:getSpellData(spellID)
             if (spellData) then
-                QF.builtPresets[name][spellID] = {
+                QF.builtPresets[name][name .. spellID] = {
                     icon = spellData.iconID,
                     name = spellData.name,
-                    spellID = spellID,
+                    spellId = spellID,
                     type = QF.LOOKUP_TYPE.SPELL,
                     tags = ''
                 }
