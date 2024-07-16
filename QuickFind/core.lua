@@ -80,6 +80,20 @@ QF.settings = {
     maxSuggestions = QF.default.maxSuggestions
 }
 
+---Get all suggestions - Saved and Enabled Presets
+---@param self QF
+QF.getAllSuggestions = function(self)
+    local presetSuggestions = {}
+
+    for name, suggestions in pairs(QF.builtPresets) do
+        if (QF.enabledPresets[name]) then
+            presetSuggestions = QF.utils.shallowCloneMerge(presetSuggestions, suggestions)
+        end
+    end
+
+    return QF.utils.shallowCloneMerge(QF.data, presetSuggestions)
+end
+
 QF.handler:RegisterEvent("ADDON_LOADED")
 QF.handler:RegisterEvent("PLAYER_LOGOUT")
 QF.handler:SetScript("OnEvent", function(self, event, ...)
@@ -87,6 +101,7 @@ QF.handler:SetScript("OnEvent", function(self, event, ...)
         QF.data = QuickFindData.data or QF.data
         QF.settings = QF.utils.tableMerge(QF.settings, QuickFindData.settings or {})
         QF.cache = QuickFindData.cache or QF.cache
+        QF.enabledPresets = QuickFindData.enabledPresets or QF.enabledPresets
         QFGLOBAL = QF
         init()
         QF:InitModules()
@@ -104,6 +119,7 @@ QF.handler:SetScript("OnEvent", function(self, event, ...)
             QuickFindData = QuickFindData or {}
             QuickFindData.data = QF.data
             QuickFindData.cache = QF.cache
+            QuickFindData.enabledPresets = QF.enabledPresets
             QF.settings.observable = nil
             QuickFindData.settings = QF.settings
         end

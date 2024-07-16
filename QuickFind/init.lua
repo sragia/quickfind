@@ -14,6 +14,9 @@ QF.LOOKUP_TYPE = {
 
 QF.presets = {}
 QF.builtPresets = {}
+QF.enabledPresets = {
+    Portals = false
+}
 QF.cache = {
     spells = {}
 }

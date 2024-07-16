@@ -178,6 +178,15 @@ QF.utils = {
 
         return t
     end,
+    shallowCloneMerge = function(t1, t2)
+        local table = {}
+        for _, t in ipairs({ t1, t2 }) do
+            for k, v in pairs(t) do
+                table[k] = v
+            end
+        end
+        return table
+    end,
     tableMerge = function(t1, t2, rewriteArrays)
         for k, v in pairs(t2) do
             if type(v) == "table" then
