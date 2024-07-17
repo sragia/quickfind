@@ -12,6 +12,14 @@ QF.LOOKUP_TYPE = {
     LUA = 'LUA'
 }
 
+QF.typeOptions = {
+    [QF.LOOKUP_TYPE.SPELL] = 'Spell',
+    [QF.LOOKUP_TYPE.TOY] = 'Toy',
+    [QF.LOOKUP_TYPE.ITEM] = 'Item',
+    [QF.LOOKUP_TYPE.MOUNT] = 'Mount',
+    [QF.LOOKUP_TYPE.LUA] = 'Lua Script'
+}
+
 QF.presets = {}
 QF.builtPresets = {}
 QF.enabledPresets = {
