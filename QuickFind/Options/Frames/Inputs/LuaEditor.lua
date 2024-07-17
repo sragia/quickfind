@@ -48,6 +48,9 @@ luaEditor.Get = function(self, options, parent)
     scrollFrame.GetText = function(self)
         return input:GetText()
     end
+    scrollFrame.SetText = function(self, text)
+        return input:SetText(text)
+    end
     if (not input.isConfigured) then
         ConfigureFrame(input)
     end
