@@ -19,12 +19,13 @@ options.createPresets = function(self)
         local btn = button:Get({
             text = 'Presets',
             onClick = function() self:openPresets() end,
-            width = 100,
-            height = 60,
-            startAlpha = 0,
-            endAlpha = 1
+            width = 80,
+            height = 50,
+            startAlpha = 0.1,
+            endAlpha = 1,
+            color = { 249 / 255, 205 / 255, 39 / 255, 1 }
         }, baseOptionsWindow);
-        btn:SetPoint("LEFT", self.editBox, "RIGHT", 40, 0);
+        btn:SetPoint("BOTTOMRIGHT", baseOptionsWindow.scrollFrame, "TOPRIGHT", 0, -2);
     end
 
     local window = self.presets
