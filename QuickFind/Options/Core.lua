@@ -10,10 +10,12 @@ local textInput = QF:GetModule('frame-input-text')
 local button = QF:GetModule('frame-input-button')
 ---@class ToggleInput
 local toggle = QF:GetModule('frame-input-toggle')
+---@class DropdownInput
+local dropdown = QF:GetModule('frame-input-dropdown')
 ---@class Presets
 local presets = QF:GetModule('presets')
 
-options.createPresets = function(self)
+options.CreatePresets = function(self)
     local baseOptionsWindow = self.window
     if not baseOptionsWindow.presetsBtn then
         local btn = button:Get({
@@ -163,9 +165,10 @@ options.init = function(self)
     self.options = QF.data
 
     self:CreateSearchInput()
+    self:CreateFilters()
     self:PopulateOptions()
     self:PopulateSettings()
-    self:createPresets()
+    self:CreatePresets()
 end
 
 options.OnDelete = function(id)
@@ -186,7 +189,22 @@ options.PopulateOptions = function(self)
         end
         return true
     end) do
-        if (optionData) then
+        local eligible = true
+        for key, filter in pairs(self.filters) do
+            if not filter.value then
+                -- Do nothing
+            elseif (filter.type == 'exact') then
+                if (optionData[key] ~= filter.value) then
+                    eligible = false
+                end
+            elseif (filter.type == 'match') then
+                local suggestions = QF.utils.suggestMatch(filter.value, { optionData })
+                if (#suggestions == 0) then
+                    eligible = false
+                end
+            end
+        end
+        if (optionData and eligible) then
             table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id)))
         end
     end
@@ -237,18 +255,8 @@ options.CreateSearchInput = function(self)
 
     editBox:SetScript('OnTextChanged', function(editbox, changed)
         if (changed) then
-            if (editbox:GetText() == '') then
-                options.options = QF.data
-            else
-                local suggestions = QF.utils.suggestMatch(editbox:GetText(), QF.data)
-                local filteredOptions = {}
-
-                for _, suggestion in ipairs(suggestions) do
-                    table.insert(filteredOptions, suggestion.data)
-                end
-
-                options.options = filteredOptions
-            end
+            self.filters['search'] = { type = 'match', value = editbox:GetText() }
+            self:SetValue('filters', self.filters)
             options:PopulateOptions()
             options.window.scrollFrame:SetVerticalScroll(0)
         end
@@ -257,6 +265,51 @@ options.CreateSearchInput = function(self)
     editBox:SetScript("OnEscapePressed", function()
         editBox:ClearFocus()
     end)
+end
+
+options.CreateFilters = function(self)
+    self.filters = {}
+
+    local typeDropdown = dropdown:Get({
+        label = 'Type',
+        options = QF.typeOptions,
+        onChange = function(value)
+            self.filters['type'] = { value = value, type = 'exact' }
+            self:SetValue('filters', self.filters)
+            self:PopulateOptions()
+        end,
+        width = 130
+    }, self.window)
+
+    typeDropdown:SetPoint("LEFT", self.editBox, "RIGHT", 50, 0)
+
+    local resetBtn = button:Get({
+        text = 'Reset',
+        width = 80,
+        startAlpha = 0.1,
+        endAlpha = 1,
+        onClick = function()
+            self:SetValue('filters', {})
+            typeDropdown:SetValue('value', '')
+            self.editBox:SetText('')
+            self:PopulateOptions()
+        end,
+        color = { 237 / 255, 26 / 255, 86 / 255, 1 }
+    }, self.window);
+    resetBtn:Hide()
+    self:Observe('filters', function(value)
+        local hasOptions = false
+        for _ in pairs(value) do
+            hasOptions = true
+        end
+        if hasOptions then
+            resetBtn:Show()
+        else
+            resetBtn:Hide()
+        end
+    end)
+
+    resetBtn:SetPoint("LEFT", typeDropdown, "RIGHT", 20, 0)
 end
 
 options.PopulateSettings = function(self)

@@ -1,6 +1,9 @@
 local _, QF = ...
 local moduleName = 'frame-input-dropdown'
 
+---@class DropdownOptions : {initial: string, onChange: function, options: table, label: string, width?: number, height?: number}
+
+---@class DropdownInput
 local dropdown = QF:GetModule(moduleName)
 
 dropdown.init = function(self)
@@ -8,9 +11,12 @@ dropdown.init = function(self)
     self.optionItemPool = CreateFramePool('Frame', UIParent)
 end
 
-local function CreateOption(f)
+local function CreateOption(f, frameOptions)
     local option = dropdown.optionItemPool:Acquire()
-    option:SetSize(205, 30)
+    option:SetSize(
+        frameOptions.width and frameOptions.width - (5 * frameOptions.width / 205) or 205,
+        frameOptions.height and frameOptions.height - 40 or 30
+    )
 
     if (not option.valueDisplay) then
         local valueDisplay = option:CreateFontString(nil, "OVERLAY")
@@ -59,13 +65,13 @@ local function CreateOption(f)
     return option
 end
 
-local function PopulateOptions(f, options)
+local function PopulateOptions(f, options, frameOptions)
     dropdown.optionItemPool:ReleaseAll()
     local previous
     local count = 0
     for value, label in pairs(options) do
         count = count + 1
-        local option = CreateOption(f)
+        local option = CreateOption(f, frameOptions)
         option:SetOption(value, label)
         option:SetPoint("TOPLEFT",
             previous or f.optionContainer,
@@ -82,7 +88,7 @@ end
 
 local function ConfigureFrame(f, options)
     QF.utils.addObserver(f)
-    f:SetSize(200, 70)
+    f:SetSize(options.width or 200, options.height or 70)
     f:SetFrameStrata('TOOLTIP')
     f.isOpen = false
     f.onChange = options.onChange
@@ -126,7 +132,7 @@ local function ConfigureFrame(f, options)
         f:Observe("isOpen", function(value)
             if (value) then
                 f.optionContainer:Show()
-                PopulateOptions(f, f.options)
+                PopulateOptions(f, f.options, options)
                 chevron:SetRotation(math.rad(180))
             else
                 f.optionContainer:Hide()
@@ -183,7 +189,10 @@ local function ConfigureFrame(f, options)
 end
 
 
-
+---@param self DropdownInput
+---@param options DropdownOptions
+---@param parent FRAME
+---@return FRAME
 dropdown.Get = function(self, options, parent)
     local input = self.pool:Acquire()
     ConfigureFrame(input, options)
