@@ -96,7 +96,8 @@ presets.build = function(self)
                     name = spellData.name,
                     spellId = spellID,
                     type = QF.LOOKUP_TYPE.SPELL,
-                    tags = spellData.description
+                    tags = spellData.description,
+                    isPreset = true
                 }
             end
         end
@@ -125,10 +126,15 @@ end
 ---@param self Presets
 ---@param name string
 presets.enable = function(self, name)
-
+    QF.enabledPresets[name] = true
 end
 
 ---@param self Presets
 ---@param name string
 presets.disable = function(self, name)
+    QF.enabledPresets[name] = false
+end
+
+presets.isEnabled = function(self, name)
+    return QF.enabledPresets[name]
 end

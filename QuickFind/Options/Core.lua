@@ -6,6 +6,51 @@ local options = QF:GetModule(moduleName)
 local window = QF:GetModule('frame-window')
 local optionContainer = QF:GetModule('frame-option-container')
 local textInput = QF:GetModule('frame-input-text')
+---@class ButtonInput
+local button = QF:GetModule('frame-input-button')
+---@class ToggleInput
+local toggle = QF:GetModule('frame-input-toggle')
+---@class Presets
+local presets = QF:GetModule('presets')
+
+options.createPresets = function(self)
+    local baseOptionsWindow = self.window
+    if not baseOptionsWindow.presetsBtn then
+        local btn = button:Get({
+            text = 'Presets',
+            onClick = function() self:openPresets() end,
+            width = 100,
+            height = 60,
+            startAlpha = 0,
+            endAlpha = 1
+        }, baseOptionsWindow);
+        btn:SetPoint("LEFT", self.editBox, "RIGHT", 40, 0);
+    end
+
+    local window = self.presets
+
+    local previous = nil
+    for _, presetName in pairs(presets:getAvailable()) do
+        local input = toggle:Get({ text = presetName, value = presets:isEnabled(presetName) }, window.container)
+        if (previous) then
+            input:SetPoint("TOPLEFT", previous, 0, -25)
+        else
+            input:SetPoint("TOPLEFT", 15, -15)
+        end
+        input:Observe('value', function(value)
+            if (value) then
+                presets:enable(presetName)
+            else
+                presets:disable(presetName)
+            end
+        end)
+        previous = input
+    end
+end
+
+options.openPresets = function(self)
+    self.presets:ShowWindow()
+end
 
 options.init = function(self)
     local settingsFrame = window:getFrame({ title = 'Settings', showSettings = false, frameLevel = 50, offset = { x = 400, y = 200 } })
@@ -19,6 +64,8 @@ options.init = function(self)
         frameLevel = 10
     })
     self.window = windowFrame
+    local presetsFrame = window:getFrame({ title = 'Presets', showSettings = false, frameLevel = 50, offset = { x = 200, y = 200 } })
+    self.presets = presetsFrame
 
     if (not windowFrame.scrollFrame) then
         local scrollFrame = CreateFrame("ScrollFrame", nil, windowFrame.container, "ScrollFrameTemplate")
@@ -117,6 +164,7 @@ options.init = function(self)
     self:CreateSearchInput()
     self:PopulateOptions()
     self:PopulateSettings()
+    self:createPresets()
 end
 
 options.OnDelete = function(id)

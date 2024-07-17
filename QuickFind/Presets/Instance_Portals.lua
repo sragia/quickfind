@@ -2,7 +2,7 @@ local _, QF = ...
 
     QF.createPreset({
         type = 'SPELL',
-        name = 'Portals',
+        name = 'Instance Portals',
         getData = function()
             return {
   '131232',

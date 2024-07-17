@@ -17,7 +17,7 @@ Core.lua
 Cache.lua
 
 # Presets
-Presets/Portals.lua
+Presets/Instance_Portals.lua
 Presets.lua
 
 # Options
@@ -25,6 +25,7 @@ Options/Frames/Window.lua
 Options/Frames/Inputs/Text.lua
 Options/Frames/Inputs/Dropdown.lua
 Options/Frames/Inputs/Button.lua
+Options/Frames/Inputs/Toggle.lua
 Options/Frames/Inputs/LuaEditor.lua
 Options/Frames/OptionContainer.lua
 Options/Core.lua

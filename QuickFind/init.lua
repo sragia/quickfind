@@ -15,7 +15,7 @@ QF.LOOKUP_TYPE = {
 QF.presets = {}
 QF.builtPresets = {}
 QF.enabledPresets = {
-    Portals = false
+    ["Instance Portals"] = false
 }
 QF.cache = {
     spells = {}
@@ -39,6 +39,7 @@ QF.default = {
     optionOpenBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionOpenBg]],
     optionClosedBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionClosedBg]],
     optionBodyBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionBodyBg]],
+    toggle = [[Interface/Addons/QuickFind/Media/Texture/Frames/toggle]],
     maxSuggestions = 5,
     scale = 1.35,
     tagColors = {
