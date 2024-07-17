@@ -1,7 +1,7 @@
 local _, QF = ...
 local moduleName = 'frame-input-button'
 
----@class ButtonOptions : {text: string, width: number, height: number, onClick: function, startAlpha: number, endAlpha: number}
+---@class ButtonOptions : {text: string, width: number, height: number, onClick: function, startAlpha: number, endAlpha: number, color: table}
 
 ---@class ButtonInput
 local button = QF:GetModule(moduleName)
@@ -45,7 +45,8 @@ local function ConfigureFrame(f, options)
         f.animDur = 0.15
         f.onHover = QF.utils.animation.fade(f.hover, f.animDur, options.startAlpha or 0.15, options.endAlpha or 1)
         f.onHoverLeave = QF.utils.animation.fade(f.hover, f.animDur, options.endAlpha or 1, options.startAlpha or 0.15)
-        hoverBorder:SetVertexColor(1, 0.84, 0, 1)
+        local color = options.color or { 1, 0.84, 0, 1 }
+        hoverBorder:SetVertexColor(unpack(color))
 
         f:SetScript('OnLeave', function(self)
             self.onHoverLeave:Play()
