@@ -82,7 +82,7 @@ end
 
 local function ConfigureFrame(f, options)
     QF.utils.addObserver(f)
-    f:SetSize(205, 70)
+    f:SetSize(200, 70)
     f:SetFrameStrata('TOOLTIP')
     f.isOpen = false
     f.onChange = options.onChange
