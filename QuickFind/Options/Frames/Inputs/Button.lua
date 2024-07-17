@@ -20,8 +20,8 @@ local function ConfigureFrame(f, options)
     )
     f.onClick = options.onClick
 
-    f:SetScript('OnClick', function()
-        f.onClick()
+    f:SetScript('OnClick', function(self)
+        f.onClick(self)
     end)
 
     if not f.text and options.text then

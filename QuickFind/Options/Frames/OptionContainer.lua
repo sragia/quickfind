@@ -13,6 +13,8 @@ local luaEditor = QF:GetModule('frame-input-lua')
 
 local optionHeight, optionHeightOpen = 50, 170
 
+local editorWindow = nil
+
 local typeOptions = {
     [QF.LOOKUP_TYPE.SPELL] = 'Spell',
     [QF.LOOKUP_TYPE.TOY] = 'Toy',
@@ -43,52 +45,57 @@ local onValueChange = function(id, key, f)
     end
 end
 
-local function getLuaEditorWindow(value)
-    local window = windowCreator:getFrame({
-        offset = { x = 100, y = 50 },
-        showSettings = false,
-        title = 'Lua editor',
-        frameLevel = 9999,
-    });
+local function getLuaEditorWindow()
+    if not editorWindow then
+        local window = windowCreator:getFrame({
+            offset = { x = 100, y = 50 },
+            showSettings = false,
+            title = 'Lua editor',
+            frameLevel = 9999,
+        });
 
-    local editor = luaEditor:Get({
-        text = value or ""
-    }, window.container)
+        local editor = luaEditor:Get({
+            text = "-- Input your code here"
+        }, window.container)
 
-    window.editor = editor
-    editor:SetPoint("TOPLEFT")
-    editor:SetPoint("BOTTOMRIGHT", -25, 60)
-    editor.input:SetSize(editor:GetSize())
-    local saveBtn = button:Get({
-        text = 'Save',
-        width = 100,
-        height = 50,
-        onClick = function()
-            if (window.onSave) then
-                window.onSave(editor:GetText())
+        window.editor = editor
+        editor:SetPoint("TOPLEFT")
+        editor:SetPoint("BOTTOMRIGHT", -25, 60)
+        editor.input:SetSize(editor:GetSize())
+        local saveBtn = button:Get({
+            text = 'Save',
+            width = 100,
+            height = 50,
+            onClick = function()
+                if (window.onSave) then
+                    window.onSave(editor:GetText())
+                end
+                window:HideWindow()
             end
-            window:HideWindow()
+        }, window.container)
+
+        saveBtn:SetPoint("BOTTOMRIGHT")
+
+        local cancelBtn = button:Get({
+            text = 'Cancel',
+            width = 100,
+            height = 50,
+            onClick = function()
+                window:HideWindow()
+            end
+        }, window.container)
+
+        cancelBtn:SetPoint("RIGHT", saveBtn, "LEFT", -20, 0)
+
+        window.SetValue = function(self, value)
+            self.editor:SetText(value)
         end
-    }, window.container)
+        editorWindow = window
+    end
 
-    saveBtn:SetPoint("BOTTOMRIGHT")
+    editorWindow:ShowWindow()
 
-    local cancelBtn = button:Get({
-        text = 'Cancel',
-        width = 100,
-        height = 50,
-        onClick = function()
-            window:HideWindow()
-        end
-    }, window.container)
-
-    cancelBtn:SetPoint("RIGHT", saveBtn, "LEFT", -20, 0)
-
-
-
-    window:ShowWindow()
-
-    return window
+    return editorWindow
 end
 
 local function renderLayout(f, inputs)
@@ -250,9 +257,10 @@ local function AddOptions(f, data)
     if not bodyFrame.luaEditorBtn then
         local input = button:Get({
             text = 'Open Editor',
-            onClick = function()
-                local window = getLuaEditorWindow(data.lua)
-                window.onSave = onValueChange(data.id, 'lua', f)
+            onClick = function(self)
+                local window = getLuaEditorWindow()
+                window:SetValue(self.data.lua)
+                window.onSave = onValueChange(self.data.id, 'lua', f)
             end
         }, bodyFrame)
         bodyFrame.luaEditorBtn = input
@@ -265,6 +273,8 @@ local function AddOptions(f, data)
             end
         })
     end
+    bodyFrame.luaEditorBtn.data = data
+
 
 
     renderLayout(f, f.inputTypes)
