@@ -13,5 +13,5 @@ export function createPreset(data: any, name: string, type: 'SPELL'): void {
         end
     })`
 
-    writeFileSync(`../../QuickFind/Presets/${name}.lua`, lua);
+    writeFileSync(`../../QuickFind/Presets/${name.replace(' ', '_')}.lua`, lua);
 }

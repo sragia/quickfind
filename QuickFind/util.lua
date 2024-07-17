@@ -85,6 +85,9 @@ QF.utils = {
         return not QF.data[output] and output or QF.utils.generateNewId(length)
     end,
     animation = {
+        getAnimationGroup = function(f)
+            return f:CreateAnimationGroup();
+        end,
         fade = function(f, duration, from, to, ag)
             ag = ag or f:CreateAnimationGroup()
             local fade = ag:CreateAnimation("Alpha")
@@ -92,9 +95,11 @@ QF.utils = {
             fade:SetToAlpha(to or 1)
             fade:SetDuration(duration or 1)
             fade:SetSmoothing((from > to) and "OUT" or "IN")
+            local finishScript = ag:GetScript("OnFinished")
             ag:SetScript(
                 "OnFinished",
-                function()
+                function(...)
+                    if (finishScript) then finishScript(...) end
                     f:SetAlpha(to)
                 end
             )
@@ -113,7 +118,7 @@ QF.utils = {
 
                 for i = 1, f:GetNumPoints() do
                     local point, relativeTo, relativePoint, xOfs, yOfs = f:GetPoint(i)
-                    f:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + yOff)
+                    f:SetPoint(point, relativeTo, relativePoint, xOfs + xOff, yOfs + yOff)
                 end
             end)
             local finishScript = ag:GetScript("OnFinished")
@@ -126,7 +131,24 @@ QF.utils = {
 
                 for i = 1, f:GetNumPoints() do
                     local point, relativeTo, relativePoint, xOfs, yOfs = f:GetPoint(i)
-                    f:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - yOff)
+                    f:SetPoint(point, relativeTo, relativePoint, xOfs - xOff, yOfs - yOff)
+                end
+            end)
+
+            return ag
+        end,
+        move = function(f, duration, xOff, yOff, ag)
+            ag = ag or f:CreateAnimationGroup()
+            local translate = ag:CreateAnimation('Translation')
+            translate:SetOffset(xOff, yOff)
+            translate:SetDuration(duration)
+            local finishScript = ag:GetScript("OnFinished")
+            ag:SetScript("OnFinished", function(...)
+                if (finishScript) then finishScript(...) end
+
+                for i = 1, f:GetNumPoints() do
+                    local point, relativeTo, relativePoint, xOfs, yOfs = f:GetPoint(i)
+                    f:SetPoint(point, relativeTo, relativePoint, xOfs + xOff, yOfs + yOff)
                 end
             end)
 
@@ -168,10 +190,11 @@ QF.utils = {
             end
         end
         t.SetValue = function(_, key, value)
+            local oldValue = t[key]
             t[key] = value
             if (t.observable[key]) then
                 for _, func in ipairs(t.observable[key]) do
-                    func(value)
+                    func(value, oldValue)
                 end
             end
         end
