@@ -584,9 +584,9 @@ optionContainer.CreateOption = function (self, data, onDelete, parent)
     if (not data.type) then
         frame:SetValue('isOpen', true)
     end
-    if (data.forceOpen) then
+    if (data.isNew) then
         frame:SetValue('isOpen', true)
-        QF:SaveDataByKey(data.id, 'forceOpen', false);
+        QF:SaveDataByKey(data.id, 'isNew', false);
     end
     return frame
 end
