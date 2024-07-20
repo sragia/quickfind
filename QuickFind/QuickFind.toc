@@ -18,6 +18,7 @@ Cache.lua
 
 # Presets
 Presets/Instance_Portals.lua
+Presets/Mounts.lua
 Presets.lua
 
 # Options

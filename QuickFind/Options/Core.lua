@@ -37,7 +37,7 @@ options.CreatePresets = function (self)
     for _, presetName in pairs(presets:getAvailable()) do
         local input = toggle:Get({ text = presetName, value = presets:isEnabled(presetName) }, window.container)
         if (previous) then
-            input:SetPoint('TOPLEFT', previous, 0, -25)
+            input:SetPoint('TOPLEFT', previous, 0, -30)
         else
             input:SetPoint('TOPLEFT', 15, -15)
         end
@@ -70,6 +70,25 @@ options.init = function (self)
     self.window = windowFrame
     local presetsFrame = window:getFrame({ title = 'Presets', showSettings = false, frameLevel = 50, offset = { x = 200, y = 200 } })
     self.presets = presetsFrame
+
+
+    if (not windowFrame.maxSuggestionNotification) then
+        local notificationContainer = CreateFrame('Frame', nil, windowFrame)
+        notificationContainer:SetHeight(80)
+        local notificationTxt = notificationContainer:CreateFontString(nil, 'OVERLAY')
+        notificationTxt:SetPoint('CENTER')
+        notificationTxt:SetFont(QF.default.font, 11, 'OUTLINE')
+        notificationTxt:SetText(
+            'You have reached suggestion cap that options can show. Try more specific filters, to find what you want.')
+        notificationTxt:SetVertexColor(0.65, 0.65, 0.65, 1)
+        local notificationTxt2 = notificationContainer:CreateFontString(nil, 'OVERLAY')
+        notificationTxt2:SetPoint('TOP', notificationTxt, 'BOTTOM', 0, -5)
+        notificationTxt2:SetFont(QF.default.font, 6, 'OUTLINE')
+        notificationTxt2:SetText(
+            'Options just get really laggy, if we try to show hundreds of options. I hope you understand. But really try filters.')
+        notificationTxt2:SetVertexColor(0.4, 0.4, 0.4, 1)
+        self.notificationTxt = notificationContainer
+    end
 
     if (not windowFrame.scrollFrame) then
         local scrollFrame = CreateFrame('ScrollFrame', nil, windowFrame.container, 'ScrollFrameTemplate')
@@ -198,33 +217,25 @@ options.OnDelete = function (id)
     end
 end
 
+local optionCap = 80
 options.PopulateOptions = function (self)
     optionContainer:DestroyAllOptions()
     self.optionFrames = {}
-    for id, optionData in QF.utils.spairs(QF:getAllSuggestions(), function (t, a, b)
+    local numSuggestions = QF:GetNumSuggestions()
+    for id, optionData in QF.utils.spairs(QF:getAllSuggestions(self.filters, optionCap), function (t, a, b)
         if (t[a].created and t[b].created) then
             return t[a].created < t[b].created
         end
         return true
     end) do
-        local eligible = true
-        for key, filter in pairs(self.filters) do
-            if not filter.value then
-                -- Do nothing
-            elseif (filter.type == 'exact') then
-                if (optionData[key] ~= filter.value) then
-                    eligible = false
-                end
-            elseif (filter.type == 'match') then
-                local suggestions = QF.utils.suggestMatch(filter.value, { optionData })
-                if (#suggestions == 0) then
-                    eligible = false
-                end
-            end
-        end
-        if (optionData and eligible) then
+        if (optionData) then
             table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id), self))
         end
+    end
+
+    self.notificationTxt:ClearAllPoints()
+    if (#self.optionFrames == optionCap and optionCap < numSuggestions) then
+        table.insert(self.optionFrames, self.notificationTxt)
     end
 
     for index, optionFrame in ipairs(self.optionFrames) do
@@ -294,7 +305,6 @@ end
 
 options.CreateFilters = function (self)
     self.filters = {}
-    C_Timer.After(1,
     local typeDropdown = dropdown:Get({
         label = 'Type',
         options = QF.utils.shallowCloneMerge(QF.typeOptions, { preset = 'Preset' }),
