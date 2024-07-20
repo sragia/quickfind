@@ -168,8 +168,6 @@ options.init = function (self)
     self:PopulateOptions()
     self:PopulateSettings()
     self:CreatePresets()
-
-    C_Timer.After(1, function () ViragDevTool_AddData(self) end)
 end
 
 options.ScrollToEnd = function (self)
@@ -297,7 +295,6 @@ end
 options.CreateFilters = function (self)
     self.filters = {}
     C_Timer.After(1,
-        function () ViragDevTool_AddData(QF.utils.shallowCloneMerge(QF.typeOptions, { preset = 'Preset' })) end)
     local typeDropdown = dropdown:Get({
         label = 'Type',
         options = QF.utils.shallowCloneMerge(QF.typeOptions, { preset = 'Preset' }),
