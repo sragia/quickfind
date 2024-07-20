@@ -27,6 +27,14 @@ end
 
 QF.handler.unregisterCallback = function (self, event, id)
     self.callbacks[event][id] = nil
+    local hasMore = false
+    for _ in pairs(self.callbacks[event]) do
+        hasMore = true
+    end
+    if (not hasMore) then
+        QF.handler:UnregisterEvent(event)
+        self.callbacks[event] = nil
+    end
 end
 
 ---Get module
@@ -159,7 +167,7 @@ QF.handler:SetScript('OnEvent', function (self, event, ...)
     if (event == 'ADDON_LOADED' and ... == addonName) then
         QF.data = QuickFindData.data or QF.data
         QF.settings = QF.utils.tableMerge(QF.settings, QuickFindData.settings or {})
-        QF.cache = QuickFindData.cache or QF.cache
+        QF.cache = QF.utils.tableMerge(QF.cache, QuickFindData.cache or {})
         QF.enabledPresets = QuickFindData.enabledPresets or QF.enabledPresets
         QFGLOBAL = QF
         init()

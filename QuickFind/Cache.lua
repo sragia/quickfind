@@ -34,3 +34,23 @@ end
 cache.saveSpellData = function (self, spellID, data)
     QF.cache.spells[spellID] = data
 end
+
+---Save toy data into cache
+---@param self Cache
+---@param toyID any
+---@param data any
+cache.saveToyData = function (self, toyID, data)
+    QF.cache.toys[toyID] = data
+end
+
+---Get toy data from cache
+---@param self Cache
+---@param toyID any
+cache.getToyData = function (self, toyID)
+    local data = QF.cache.toys[toyID]
+    if (not data) then
+        return false
+    end
+
+    return data
+end

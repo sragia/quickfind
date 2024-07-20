@@ -2,7 +2,7 @@
 local QF = select(2, ...)
 
 QF.utils = {
-    suggestMatch = function(userInput, source)
+    suggestMatch = function (userInput, source)
         local suggestions = {}
         for _, data in pairs(source) do
             local matchinString = (data.name or '') .. ',' .. (data.tags or '')
@@ -16,12 +16,12 @@ QF.utils = {
                     })
             else
                 local words = {}
-                for word in string.gmatch(string.lower(userInput), "%S+") do
+                for word in string.gmatch(string.lower(userInput), '%S+') do
                     table.insert(words, word)
                 end
-                local pattern = ""
+                local pattern = ''
                 for j = 1, #words do
-                    pattern = pattern .. words[j] .. "%S*"
+                    pattern = pattern .. words[j] .. '%S*'
                 end
                 local phraseStart, phraseEnd = string.find(string.lower(matchinString), pattern, 1, true)
                 if phraseStart ~= nil then
@@ -34,10 +34,10 @@ QF.utils = {
                 end
             end
         end
-        table.sort(suggestions, function(a, b) return a.score < b.score end)
+        table.sort(suggestions, function (a, b) return a.score < b.score end)
         return suggestions
     end,
-    transformSource = function(source)
+    transformSource = function (source)
         local t = {}
         for _, v in pairs(source) do
             table.insert(t, v.name .. ',' .. v.tags)
@@ -45,7 +45,7 @@ QF.utils = {
 
         return t
     end,
-    spairs = function(t, order)
+    spairs = function (t, order)
         -- collect the keys
         local keys = {}
         for k in pairs(t) do
@@ -57,7 +57,7 @@ QF.utils = {
         if order then
             table.sort(
                 keys,
-                function(a, b)
+                function (a, b)
                     return order(t, a, b)
                 end
             )
@@ -67,17 +67,17 @@ QF.utils = {
 
         -- return the iterator function
         local i = 0
-        return function()
+        return function ()
             i = i + 1
             if keys[i] then
                 return keys[i], t[keys[i]]
             end
         end
     end,
-    generateNewId = function(length)
-        local randCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    generateNewId = function (length)
+        local randCharSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
         length = length or 10
-        local output = ""
+        local output = ''
         for i = 1, length do
             local rand = math.random(#randCharSet)
             output = output .. string.sub(randCharSet, rand, rand)
@@ -85,34 +85,34 @@ QF.utils = {
         return not QF.data[output] and output or QF.utils.generateNewId(length)
     end,
     animation = {
-        getAnimationGroup = function(f)
+        getAnimationGroup = function (f)
             return f:CreateAnimationGroup();
         end,
-        fade = function(f, duration, from, to, ag)
+        fade = function (f, duration, from, to, ag)
             ag = ag or f:CreateAnimationGroup()
-            local fade = ag:CreateAnimation("Alpha")
+            local fade = ag:CreateAnimation('Alpha')
             fade:SetFromAlpha(from or 0)
             fade:SetToAlpha(to or 1)
             fade:SetDuration(duration or 1)
-            fade:SetSmoothing((from > to) and "OUT" or "IN")
-            local finishScript = ag:GetScript("OnFinished")
+            fade:SetSmoothing((from > to) and 'OUT' or 'IN')
+            local finishScript = ag:GetScript('OnFinished')
             ag:SetScript(
-                "OnFinished",
-                function(...)
+                'OnFinished',
+                function (...)
                     if (finishScript) then finishScript(...) end
                     f:SetAlpha(to)
                 end
             )
             return ag
         end,
-        diveIn = function(f, duration, xOff, yOff, smoothing, ag)
+        diveIn = function (f, duration, xOff, yOff, smoothing, ag)
             ag = ag or f:CreateAnimationGroup()
             local translate = ag:CreateAnimation('Translation')
             translate:SetOffset(xOff, -yOff)
             translate:SetDuration(duration)
             translate:SetSmoothing(smoothing)
-            ag:SetScript("OnPlay", function()
-                if (smoothing == "OUT") then
+            ag:SetScript('OnPlay', function ()
+                if (smoothing == 'OUT') then
                     return
                 end
 
@@ -121,11 +121,11 @@ QF.utils = {
                     f:SetPoint(point, relativeTo, relativePoint, xOfs + xOff, yOfs + yOff)
                 end
             end)
-            local finishScript = ag:GetScript("OnFinished")
-            ag:SetScript("OnFinished", function(...)
+            local finishScript = ag:GetScript('OnFinished')
+            ag:SetScript('OnFinished', function (...)
                 if (finishScript) then finishScript(...) end
 
-                if (smoothing == "OUT") then
+                if (smoothing == 'OUT') then
                     return
                 end
 
@@ -137,13 +137,13 @@ QF.utils = {
 
             return ag
         end,
-        move = function(f, duration, xOff, yOff, ag)
+        move = function (f, duration, xOff, yOff, ag)
             ag = ag or f:CreateAnimationGroup()
             local translate = ag:CreateAnimation('Translation')
             translate:SetOffset(xOff, yOff)
             translate:SetDuration(duration)
-            local finishScript = ag:GetScript("OnFinished")
-            ag:SetScript("OnFinished", function(...)
+            local finishScript = ag:GetScript('OnFinished')
+            ag:SetScript('OnFinished', function (...)
                 if (finishScript) then finishScript(...) end
 
                 for i = 1, f:GetNumPoints() do
@@ -155,9 +155,9 @@ QF.utils = {
             return ag
         end
     },
-    formatTime = function(time)
+    formatTime = function (time)
         if not time then
-            return ""
+            return ''
         end
         local days = math.floor(time / (60 * 60 * 24))
         time = time - days * (60 * 60 * 24)
@@ -166,19 +166,19 @@ QF.utils = {
         local minutes = math.floor((time) / 60)
         local seconds = time % 60
         if days > 0 then
-            return string.format("%dd %02d:%02d:%02d", days, hours, minutes, seconds)
+            return string.format('%dd %02d:%02d:%02d', days, hours, minutes, seconds)
         elseif hours > 0 then
-            return string.format("%02d:%02d:%02d", hours, minutes, seconds)
+            return string.format('%02d:%02d:%02d', hours, minutes, seconds)
         end
-        return string.format("%02d:%02d", minutes, seconds)
+        return string.format('%02d:%02d', minutes, seconds)
     end,
-    addObserver = function(t)
+    addObserver = function (t)
         if (t.observable) then
             return t
         end
 
         t.observable = {}
-        t.Observe = function(_, key, onChangeFunc)
+        t.Observe = function (_, key, onChangeFunc)
             if (type(key) == 'table') then
                 for _, k in ipairs(key) do
                     t.observable[k] = t.observable[k] or {}
@@ -189,7 +189,7 @@ QF.utils = {
                 table.insert(t.observable[key], onChangeFunc)
             end
         end
-        t.SetValue = function(_, key, value)
+        t.SetValue = function (_, key, value)
             local oldValue = t[key]
             t[key] = value
             if (t.observable[key]) then
@@ -201,7 +201,7 @@ QF.utils = {
 
         return t
     end,
-    shallowCloneMerge = function(t1, t2)
+    shallowCloneMerge = function (t1, t2)
         local table = {}
         for _, t in ipairs({ t1, t2 }) do
             for k, v in pairs(t) do
@@ -210,14 +210,14 @@ QF.utils = {
         end
         return table
     end,
-    tableMerge = function(t1, t2, rewriteArrays)
+    tableMerge = function (t1, t2, rewriteArrays)
         for k, v in pairs(t2) do
-            if type(v) == "table" then
-                if type(t1[k] or false) == "table" then
+            if type(v) == 'table' then
+                if type(t1[k] or false) == 'table' then
                     if (rewriteArrays and isArray(t2[k])) then
                         t1[k] = v
                     else
-                        tableMerge(t1[k] or {}, t2[k] or {}, rewriteArrays)
+                        QF.utils.tableMerge(t1[k] or {}, t2[k] or {}, rewriteArrays)
                     end
                 else
                     t1[k] = v
