@@ -6,18 +6,18 @@ local moduleName = 'suggestions'
 local finder = QF:GetModule('finder')
 local suggestions = QF:GetModule(moduleName)
 
-suggestions.init = function(self)
+suggestions.init = function (self)
     self.suggestionContainer = CreateFrame('Frame', 'QFSuggestionsContainer', UIParent)
     self.suggestionContainer:SetSize(1, 1)
-    self.suggestionContainer:SetFrameStrata("DIALOG")
+    self.suggestionContainer:SetFrameStrata('DIALOG')
 
     -- Suggestion Pool
-    self.buttonPool = CreateFramePool('BUTTON', self.suggestionContainer, "SecureActionButtonTemplate")
+    self.buttonPool = CreateFramePool('BUTTON', self.suggestionContainer, 'SecureActionButtonTemplate')
 
-    self.secureButton = CreateFrame("Button", "QuickFindSuggestion", UIParent, "SecureActionButtonTemplate")
+    self.secureButton = CreateFrame('Button', 'QuickFindSuggestion', UIParent, 'SecureActionButtonTemplate')
 
     self.suggestionContainer:RegisterEvent('PLAYER_REGEN_DISABLED')
-    self.suggestionContainer:SetScript('OnEvent', function(self, event)
+    self.suggestionContainer:SetScript('OnEvent', function (self, event)
         if (event == 'PLAYER_REGEN_DISABLED') then
             self:Hide()
         end
@@ -26,7 +26,7 @@ suggestions.init = function(self)
     -- Hide/Show Animations
     self.suggestionContainer.fadeIn = QF.utils.animation.fade(self.suggestionContainer, 0.2, 0, 1)
     self.suggestionContainer.fadeOut = QF.utils.animation.fade(self.suggestionContainer, 0.2, 1, 0.3)
-    self.suggestionContainer.fadeOut:SetScript('OnFinished', function()
+    self.suggestionContainer.fadeOut:SetScript('OnFinished', function ()
         if (not InCombatLockdown()) then
             self.suggestionContainer:Hide()
             self.buttonPool:ReleaseAll()
@@ -38,25 +38,25 @@ suggestions.init = function(self)
     self:AttachToEditBox()
 end
 
-suggestions.Hide = function(self)
+suggestions.Hide = function (self)
     if (self.suggestionContainer) then
         self:ClearBindings()
         self.suggestionContainer.fadeOut:Play()
     end
 end
 
-suggestions.Show = function(self)
+suggestions.Show = function (self)
     if (self.suggestionContainer and not InCombatLockdown()) then
         local left, bottom = finder.editBox:GetRect()
         local scale = finder.container:GetScale()
         self.suggestionContainer:SetScale(scale)
-        self.suggestionContainer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left - 25, bottom - 15)
+        self.suggestionContainer:SetPoint('TOPLEFT', UIParent, 'BOTTOMLEFT', left - 25, bottom - 15)
         self.suggestionContainer:Show()
         self.suggestionContainer.fadeIn:Play()
     end
 end
 
-suggestions.Refresh = function(self, value)
+suggestions.Refresh = function (self, value)
     local suggestions = QF.utils.suggestMatch(value, QF:getAllSuggestions())
     self.buttonPool:ReleaseAll()
     self.activeButtons = {}
@@ -75,12 +75,12 @@ suggestions.Refresh = function(self, value)
         f:Show()
 
 
-        f:SetPoint("TOPLEFT", self.suggestionContainer, "BOTTOMLEFT", 0, ((index - 1) * -32) - 15)
+        f:SetPoint('TOPLEFT', self.suggestionContainer, 'BOTTOMLEFT', 0, ((index - 1) * -32) - 15)
         table.insert(self.activeButtons, f)
     end
 end
 
-suggestions.GetSelected = function(self)
+suggestions.GetSelected = function (self)
     for _, frame in ipairs(self.activeButtons) do
         if (frame.selected) then
             return frame
@@ -88,7 +88,7 @@ suggestions.GetSelected = function(self)
     end
 end
 
-suggestions.ConfigureFrame = function(self, frame)
+suggestions.ConfigureFrame = function (self, frame)
     frame:SetSize(320, 26)
     frame:SetFrameStrata('DIALOG')
     frame.hoverColor = { 1, 0.84, 0, 1 }
@@ -124,10 +124,10 @@ suggestions.ConfigureFrame = function(self, frame)
         icon:AddMaskTexture(mask)
 
         frame.icon = iconContainer;
-        frame.SetIcon = function(_, iconId)
+        frame.SetIcon = function (_, iconId)
             icon:SetTexture(iconId)
         end
-        frame.SetDesatured = function(self, value)
+        frame.SetDesatured = function (self, value)
             icon:SetDesaturated(value)
         end
     end
@@ -139,14 +139,14 @@ suggestions.ConfigureFrame = function(self, frame)
         tagContainer:SetPoint('LEFT', frame.icon, 'RIGHT', 10, 0)
         tagContainer:SetSize(1, 1)
 
-        local tag = tagContainer:CreateFontString(nil, "OVERLAY")
-        tag:SetFont(QF.default.font, 6, "OUTLINE")
-        tag:SetPoint("LEFT")
+        local tag = tagContainer:CreateFontString(nil, 'OVERLAY')
+        tag:SetFont(QF.default.font, 6, 'OUTLINE')
+        tag:SetPoint('LEFT')
         tag:SetWidth(0)
 
         local tagTexture = tagContainer:CreateTexture()
         tagTexture:SetTexture(QF.default.barBg)
-        tagTexture:SetPoint("CENTER")
+        tagTexture:SetPoint('CENTER')
         tagTexture:SetHeight(23)
         -- tagTexture:SetWidth(31)
         tagTexture:SetPoint('LEFT', tag, -5, 0)
@@ -155,20 +155,20 @@ suggestions.ConfigureFrame = function(self, frame)
 
         frame.tag = tag
 
-        frame.SetTag = function(_, tagType)
+        frame.SetTag = function (_, tagType)
             tag:SetText(tagType)
             tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
         end
     end
 
     if (not frame.text) then
-        local textFrame = frame:CreateFontString(nil, "OVERLAY")
-        textFrame:SetFont(QF.default.font, 8, "OUTLINE")
-        textFrame:SetPoint("LEFT", frame.tag, "RIGHT", 10, 0)
+        local textFrame = frame:CreateFontString(nil, 'OVERLAY')
+        textFrame:SetFont(QF.default.font, 8, 'OUTLINE')
+        textFrame:SetPoint('LEFT', frame.tag, 'RIGHT', 10, 0)
         textFrame:SetWidth(0)
         frame.text = textFrame
-        frame.SetText = function(_, value) textFrame:SetText(value) end
-        frame.SetTextColor = function(_, r, g, b, a) textFrame:SetVertexColor(r, g, b, a) end
+        frame.SetText = function (_, value) textFrame:SetText(value) end
+        frame.SetTextColor = function (_, r, g, b, a) textFrame:SetVertexColor(r, g, b, a) end
     end
 
     if (not frame.hoverContainer) then
@@ -184,7 +184,7 @@ suggestions.ConfigureFrame = function(self, frame)
         frame.animDur = 0.15
         frame.onHover = QF.utils.animation.fade(hoverContainer, frame.animDur, 0, 1)
         frame.onHoverLeave = QF.utils.animation.fade(hoverContainer, frame.animDur, 1, 0)
-        frame.SetHoverColor = function(self)
+        frame.SetHoverColor = function (self)
             hoverBorder:SetVertexColor(unpack(self.hoverColor))
         end
         frame:SetHoverColor()
@@ -192,29 +192,29 @@ suggestions.ConfigureFrame = function(self, frame)
     frame.hoverContainer:SetAlpha(0)
 
     if (not frame.cdText) then
-        local cdText = frame:CreateFontString(nil, "OVERLAY")
-        cdText:SetFont(QF.default.font, 8, "OUTLINE")
-        cdText:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
+        local cdText = frame:CreateFontString(nil, 'OVERLAY')
+        cdText:SetFont(QF.default.font, 8, 'OUTLINE')
+        cdText:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
         cdText:SetWidth(0)
         frame.cdText = cdText
     else
-        frame:SetScript("OnUpdate", nil)
+        frame:SetScript('OnUpdate', nil)
         frame.cdText:SetText('')
     end
 
     if (not frame.notAvailable) then
-        local notAvailable = frame:CreateFontString(nil, "OVERLAY")
-        notAvailable:SetFont(QF.default.font, 8, "OUTLINE")
-        notAvailable:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
+        local notAvailable = frame:CreateFontString(nil, 'OVERLAY')
+        notAvailable:SetFont(QF.default.font, 8, 'OUTLINE')
+        notAvailable:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
         notAvailable:SetWidth(0)
         notAvailable:SetVertexColor(0.54, 0.54, 0.54, 1)
-        notAvailable:SetText("Not Available")
+        notAvailable:SetText('Not Available')
         frame.notAvailable = notAvailable
     end
     frame.notAvailable:Hide()
 
-    frame.HandleCD = function(self, suggestionData)
-        local setCDText = function()
+    frame.HandleCD = function (self, suggestionData)
+        local setCDText = function ()
             local start, duration = 0, 0
             if suggestionData.type == QF.LOOKUP_TYPE.SPELL then
                 local spellInfo = C_Spell.GetSpellCooldown(suggestionData.spellId)
@@ -225,7 +225,7 @@ suggestions.ConfigureFrame = function(self, frame)
 
             if (start + duration > GetTime()) then
                 self.cdText:SetText('On CD: ' ..
-                    WrapTextInColorCode(QF.utils.formatTime(start + duration - GetTime()), "ffc1c1c1"))
+                    WrapTextInColorCode(QF.utils.formatTime(start + duration - GetTime()), 'ffc1c1c1'))
                 return true
             end
             return false
@@ -235,7 +235,7 @@ suggestions.ConfigureFrame = function(self, frame)
             frame.elapsed = 0
             frame:SetDisabled(true)
             frame:SetTextColor(unpack(frame.isDisabledColor))
-            frame:SetScript("OnUpdate", function(self, elapsed)
+            frame:SetScript('OnUpdate', function (self, elapsed)
                 self.elapsed = self.elapsed + elapsed
                 if (self.elapsed >= 1) then
                     local onCD = setCDText()
@@ -251,7 +251,7 @@ suggestions.ConfigureFrame = function(self, frame)
         return onCD
     end
 
-    frame.SetSelected = function(self, value, noAnim)
+    frame.SetSelected = function (self, value, noAnim)
         if (value) then
             suggestions:SetOnClick(self, self.suggestion)
             if (noAnim) then
@@ -259,7 +259,7 @@ suggestions.ConfigureFrame = function(self, frame)
                 self:SetTextColor(unpack(self.hoverColor))
             else
                 self.onHover:Play()
-                C_Timer.After(self.animDur / 2, function() frame:SetTextColor(unpack(self.hoverColor)) end)
+                C_Timer.After(self.animDur / 2, function () frame:SetTextColor(unpack(self.hoverColor)) end)
             end
         else
             if (noAnim) then
@@ -272,7 +272,7 @@ suggestions.ConfigureFrame = function(self, frame)
             else
                 self.onHoverLeave:Play()
                 C_Timer.After(self.animDur / 2,
-                    function()
+                    function ()
                         if (self.isDisabled) then
                             frame:SetTextColor(unpack(frame.isDisabledColor))
                         else
@@ -285,7 +285,7 @@ suggestions.ConfigureFrame = function(self, frame)
         self.selected = value
     end
 
-    frame.SetDisabled = function(self, noText)
+    frame.SetDisabled = function (self, noText)
         self.isDisabled = true
         if (not noText) then
             self.notAvailable:Show()
@@ -297,18 +297,18 @@ suggestions.ConfigureFrame = function(self, frame)
     end
 
 
-    frame:SetScript("OnEnter", function(self) self:SetSelected(true) end)
-    frame:SetScript("OnLeave", function(self) self:SetSelected(false) end)
-    frame:SetScript("OnAttributeChanged", function(self, key, value) self.attributes[key] = true end)
+    frame:SetScript('OnEnter', function (self) self:SetSelected(true) end)
+    frame:SetScript('OnLeave', function (self) self:SetSelected(false) end)
+    frame:SetScript('OnAttributeChanged', function (self, key, value) self.attributes[key] = true end)
 
 
-    frame.ClearSecure = function(self)
+    frame.ClearSecure = function (self)
         for key, _ in pairs(self.attributes) do
             self:SetAttribute(key, nil)
         end
     end
 
-    frame.init = function(self)
+    frame.init = function (self)
         local data = self.suggestion.data
         self:SetText(data.name)
         self:SetIcon(data.icon)
@@ -331,11 +331,11 @@ suggestions.ConfigureFrame = function(self, frame)
     end
 end
 
-suggestions.ClearBindings = function(self)
+suggestions.ClearBindings = function (self)
     ClearOverrideBindings(self.suggestionContainer)
 end
 
-suggestions.SelectNext = function(self, reverse)
+suggestions.SelectNext = function (self, reverse)
     local foundSelected = false
     self.activeButtons = self.activeButtons or {}
     for i = (reverse and #self.activeButtons or 1), (reverse and 1 or #self.activeButtons), reverse and -1 or 1 do
@@ -355,40 +355,40 @@ suggestions.SelectNext = function(self, reverse)
     end
 end
 
-suggestions.SetOnClick = function(self, frame, suggestion)
+suggestions.SetOnClick = function (self, frame, suggestion)
     for _, frame in ipairs({ frame, self.secureButton }) do
         if (frame.ClearSecure) then
             frame:ClearSecure()
         end
         if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
-            frame:SetAttribute("type", "item")
+            frame:SetAttribute('type', 'item')
             local itemName = C_Item.GetItemInfo(suggestion.data.itemId)
-            frame:SetAttribute("item", itemName)
+            frame:SetAttribute('item', itemName)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
-            frame:SetAttribute("type", "spell")
-            frame:SetAttribute("spell", suggestion.data.spellId)
+            frame:SetAttribute('type', 'spell')
+            frame:SetAttribute('spell', suggestion.data.spellId)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.MOUNT) then
-            frame:SetAttribute("type", "spell")
-            frame:SetAttribute("spell", suggestion.data.mountName)
+            frame:SetAttribute('type', 'spell')
+            frame:SetAttribute('spell', suggestion.data.mountName)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.LUA) then
-            frame:SetScript('OnMouseDown', function()
+            frame:SetScript('OnMouseDown', function ()
                 loadstring(suggestion.data.lua)()
             end)
-            frame:SetAttribute("type", '')
+            frame:SetAttribute('type', '')
         end
         if (suggestion.data.type ~= QF.LOOKUP_TYPE.LUA) then
             frame:SetScript('OnMouseDown', nil)
         end
-        frame:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
-        frame:SetScript("PostClick", function()
+        frame:RegisterForClicks('LeftButtonDown', 'LeftButtonUp')
+        frame:SetScript('PostClick', function ()
             finder:HideFinder()
         end)
     end
-    SetOverrideBindingClick(self.suggestionContainer, true, "ENTER", self.secureButton:GetName(), "LeftButton")
+    SetOverrideBindingClick(self.suggestionContainer, true, 'ENTER', self.secureButton:GetName(), 'LeftButton')
 end
 
-suggestions.AttachToEditBox = function(self)
-    finder.editBox:SetScript('OnTextChanged', function(editbox, changed)
+suggestions.AttachToEditBox = function (self)
+    finder.editBox:SetScript('OnTextChanged', function (editbox, changed)
         if (changed) then
             suggestions:Refresh(editbox:GetText())
         end

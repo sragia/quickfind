@@ -83,26 +83,48 @@ presets.fetchSpellCache = function (self)
     end
 end
 
+local function addPresetInfo(data, ID, name)
+    return QF.utils.shallowCloneMerge(data, {
+        isPreset = true,
+        presetName = name,
+        presetID = ID,
+        created = 999999999999999999999 -- Just so they show up at the end
+    })
+end
+
 ---Build preset suggestions
 ---@param self Presets
 presets.build = function (self)
     for name, data in pairs(QF.presets) do
+        QF.builtPresets[name] = QF.builtPresets[name] or {}
         if (data.type == QF.LOOKUP_TYPE.SPELL) then
-            QF.builtPresets[name] = QF.builtPresets[name] or {}
             for _, spellID in pairs(data.data) do
                 local spellData = self:getSpellData(spellID)
                 if (spellData) then
-                    QF.builtPresets[name][name .. spellID] = {
+                    QF.builtPresets[name][name .. spellID] = addPresetInfo({
                         icon = spellData.iconID,
                         name = spellData.name,
                         spellId = spellID,
                         type = QF.LOOKUP_TYPE.SPELL,
-                        tags = spellData.description,
-                        isPreset = true,
-                        presetName = name,
-                        presetID = spellID,
-                        created = 999999999999999999999 -- Just so they show up at the end
-                    }
+                        tags = spellData.description
+                    }, spellID, name)
+                end
+            end
+        elseif (data.type == QF.LOOKUP_TYPE.MOUNT) then
+            if (data.all) then
+                -- Get All mounts
+                print(#C_MountJournal.GetMountIDs(), 'mount amount')
+                for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
+                    local mountName, spellID, icon, _, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+                    if (isUsable) then
+                        QF.builtPresets[name][name .. spellID] = addPresetInfo({
+                            icon = icon,
+                            name = mountName,
+                            mountName = mountName,
+                            tags = '',
+                            type = QF.LOOKUP_TYPE.MOUNT,
+                        }, spellID, name)
+                    end
                 end
             end
         end

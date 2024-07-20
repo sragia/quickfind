@@ -85,7 +85,7 @@ QF.settings = {
 
 ---Get all suggestions - Saved and Enabled Presets
 ---@param self QF
-QF.getAllSuggestions = function (self)
+QF.getAllSuggestions = function (self, filters, maxSuggestions)
     local presetSuggestions = {}
 
     for name, suggestions in pairs(QF.builtPresets) do
@@ -97,16 +97,50 @@ QF.getAllSuggestions = function (self)
     ---@class Presets
     local preset = QF:GetModule('presets')
 
-    -- Filter out presets that were added to data
+    -- Filter out by presets that were added to data and filters if provided
     local suggestions = QF.utils.shallowCloneMerge(QF.data, presetSuggestions)
     local filtered = {}
+    local i = 0
     for k, v in pairs(suggestions) do
         if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName)) then
-            filtered[k] = v
+            i = i + 1
+            local eligible = true
+            if (filters) then
+                for key, filter in pairs(filters) do
+                    if not filter.value then
+                        -- Do nothing
+                    elseif (filter.type == 'exact') then
+                        if (v[key] ~= filter.value) then
+                            eligible = false
+                        end
+                    elseif (filter.type == 'match') then
+                        local suggestions = QF.utils.suggestMatch(filter.value, { v })
+                        if (#suggestions == 0) then
+                            eligible = false
+                        end
+                    end
+                end
+            end
+            if (eligible) then
+                filtered[k] = v
+                if (maxSuggestions and maxSuggestions <= i) then
+                    return filtered
+                end
+            end
         end
     end
 
     return filtered
+end
+
+QF.GetNumSuggestions = function (self)
+    local suggestions = self:getAllSuggestions()
+    local i = 0
+    for _ in pairs(suggestions) do
+        i = i + 1
+    end
+
+    return i
 end
 
 QF.handler:RegisterEvent('ADDON_LOADED')

@@ -23,7 +23,7 @@ QF.typeOptions = {
 QF.presets = {}
 QF.builtPresets = {}
 QF.enabledPresets = {
-    ["Instance Portals"] = false
+    ['Instance Portals'] = false
 }
 QF.cache = {
     spells = {}
@@ -65,9 +65,10 @@ QF.default = {
     }
 }
 
-QF.createPreset = function(data)
-    QF.presets[data.name] = {
-        type = data.type,
+QF.createPreset = function (data)
+    QF.presets[data.name] = QF.utils.shallowCloneMerge(data, {
         data = data.getData()
-    }
+    })
 end
+
+QFEXPOSE = QF
