@@ -113,7 +113,6 @@ presets.build = function (self)
         elseif (data.type == QF.LOOKUP_TYPE.MOUNT) then
             if (data.all) then
                 -- Get All mounts
-                print(#C_MountJournal.GetMountIDs(), 'mount amount')
                 for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
                     local mountName, spellID, icon, _, isUsable = C_MountJournal.GetMountInfoByID(mountID)
                     if (isUsable) then
@@ -135,19 +134,7 @@ end
 ---@param preset table
 presets.addToData = function (self, preset)
     local id = QF.utils.generateNewId()
-    QF:SaveData(id, {
-        id = id,
-        created = time(),
-        isPreset = false,
-        name = preset.name,
-        icon = preset.icon,
-        spellId = preset.spellId,
-        type = preset.type,
-        tags = preset.tags,
-        presetName = preset.presetName,
-        presetID = preset.presetID,
-        forceOpen = true
-    })
+    QF:SaveData(id, QF.utils.shallowCloneMerge(preset, { id = id, created = time(), isPreset = false, isNew = true }))
     return id
 end
 

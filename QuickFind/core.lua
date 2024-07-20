@@ -100,9 +100,20 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
     -- Filter out by presets that were added to data and filters if provided
     local suggestions = QF.utils.shallowCloneMerge(QF.data, presetSuggestions)
     local filtered = {}
-    local i = 0
     for k, v in pairs(suggestions) do
-        if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName)) then
+        if (v.isNew) then
+            -- New suggestions bypass filters/option cap
+            filtered[k] = v
+        end
+    end
+    local i = 0
+    for k, v in QF.utils.spairs(suggestions, function (t, a, b)
+        if (t[a].created and t[b].created) then
+            return t[a].created < t[b].created
+        end
+        return true
+    end) do
+        if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName)) and not v.isNew then
             i = i + 1
             local eligible = true
             if (filters) then
@@ -129,7 +140,6 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
             end
         end
     end
-
     return filtered
 end
 
