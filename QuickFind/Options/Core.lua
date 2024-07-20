@@ -1,4 +1,5 @@
-local _, QF = ...
+---@class QF
+local QF = select(2, ...)
 local moduleName = 'options-core'
 
 local options = QF:GetModule(moduleName)
@@ -15,19 +16,19 @@ local dropdown = QF:GetModule('frame-input-dropdown')
 ---@class Presets
 local presets = QF:GetModule('presets')
 
-options.CreatePresets = function(self)
+options.CreatePresets = function (self)
     local baseOptionsWindow = self.window
     if not baseOptionsWindow.presetsBtn then
         local btn = button:Get({
             text = 'Presets',
-            onClick = function() self:openPresets() end,
+            onClick = function () self:openPresets() end,
             width = 80,
             height = 50,
             startAlpha = 0.1,
             endAlpha = 1,
             color = { 26 / 255, 207 / 255, 224 / 255, 1 }
         }, baseOptionsWindow);
-        btn:SetPoint("BOTTOMRIGHT", baseOptionsWindow.scrollFrame, "TOPRIGHT", 0, -2);
+        btn:SetPoint('BOTTOMRIGHT', baseOptionsWindow.scrollFrame, 'TOPRIGHT', 0, -2);
     end
 
     local window = self.presets
@@ -36,11 +37,11 @@ options.CreatePresets = function(self)
     for _, presetName in pairs(presets:getAvailable()) do
         local input = toggle:Get({ text = presetName, value = presets:isEnabled(presetName) }, window.container)
         if (previous) then
-            input:SetPoint("TOPLEFT", previous, 0, -25)
+            input:SetPoint('TOPLEFT', previous, 0, -25)
         else
-            input:SetPoint("TOPLEFT", 15, -15)
+            input:SetPoint('TOPLEFT', 15, -15)
         end
-        input:Observe('value', function(value)
+        input:Observe('value', function (value)
             if (value) then
                 presets:enable(presetName)
             else
@@ -51,17 +52,17 @@ options.CreatePresets = function(self)
     end
 end
 
-options.openPresets = function(self)
+options.openPresets = function (self)
     self.presets:ShowWindow()
 end
 
-options.init = function(self)
+options.init = function (self)
     local settingsFrame = window:getFrame({ title = 'Settings', showSettings = false, frameLevel = 50, offset = { x = 400, y = 200 } })
     self.settings = settingsFrame
     local windowFrame = window:getFrame({
         title = 'Configuration',
         showSettings = true,
-        onSettingsClick = function()
+        onSettingsClick = function ()
             settingsFrame:ShowWindow()
         end,
         frameLevel = 10
@@ -71,23 +72,23 @@ options.init = function(self)
     self.presets = presetsFrame
 
     if (not windowFrame.scrollFrame) then
-        local scrollFrame = CreateFrame("ScrollFrame", nil, windowFrame.container, "ScrollFrameTemplate")
+        local scrollFrame = CreateFrame('ScrollFrame', nil, windowFrame.container, 'ScrollFrameTemplate')
         Mixin(scrollFrame, ScrollBoxMixin)
         -- Hack to bypass need of creating view
         scrollFrame.view = {
-            GetPanExtent = function()
+            GetPanExtent = function ()
                 return 0
             end
         }
-        scrollFrame:SetPoint("TOPLEFT", 0, -60)
-        scrollFrame:SetPoint("BOTTOMRIGHT", -20, 50)
-        local scrollChild = CreateFrame("Frame")
+        scrollFrame:SetPoint('TOPLEFT', 0, -60)
+        scrollFrame:SetPoint('BOTTOMRIGHT', -20, 50)
+        local scrollChild = CreateFrame('Frame')
         scrollFrame:SetScrollChild(scrollChild)
         scrollChild:SetWidth(windowFrame.container:GetWidth() - 20)
         scrollChild:SetHeight(windowFrame.container:GetHeight())
         scrollFrame.child = scrollChild
 
-        scrollFrame.GetBottomScrollValue = function(self)
+        scrollFrame.GetBottomScrollValue = function (self)
             local max = 0
             for _, child in pairs({ self.child:GetChildren() }) do
                 if (child:IsShown()) then
@@ -99,7 +100,7 @@ options.init = function(self)
             return max
         end
 
-        scrollFrame:SetScript("OnMouseWheel", function(self, delta)
+        scrollFrame:SetScript('OnMouseWheel', function (self, delta)
             local currentValue = self:GetVerticalScroll()
             local max = self:GetBottomScrollValue()
             local scrollOffset = 40
@@ -116,12 +117,12 @@ options.init = function(self)
         local btn = CreateFrame('Button', nil, windowFrame)
         windowFrame.addNewBtn = btn
         btn:SetSize(60, 40)
-        btn:SetPoint("BOTTOMRIGHT", -30, 25)
+        btn:SetPoint('BOTTOMRIGHT', -30, 25)
         btn:SetFrameLevel(windowFrame:GetFrameLevel() + 10)
 
-        local textFrame = btn:CreateFontString(nil, "OVERLAY")
-        textFrame:SetFont(QF.default.font, 10, "OUTLINE")
-        textFrame:SetPoint("CENTER")
+        local textFrame = btn:CreateFontString(nil, 'OVERLAY')
+        textFrame:SetFont(QF.default.font, 10, 'OUTLINE')
+        textFrame:SetPoint('CENTER')
         textFrame:SetWidth(0)
         textFrame:SetText('New')
         btn.text = textFrame
@@ -133,57 +134,76 @@ options.init = function(self)
         btn.hoverContainer = hoverContainer
         hoverContainer:SetFrameLevel(btn:GetFrameLevel() - 1)
         hoverBorder:SetTexture(QF.default.barBg)
-        hoverBorder:SetPoint("TOPLEFT", 0, 8)
-        hoverBorder:SetPoint("BOTTOMRIGHT", 0, -8)
+        hoverBorder:SetPoint('TOPLEFT', 0, 8)
+        hoverBorder:SetPoint('BOTTOMRIGHT', 0, -8)
         hoverContainer:SetAlpha(0)
         btn.animDur = 0.15
         btn.onHover = QF.utils.animation.fade(hoverContainer, btn.animDur, 0, 1)
         btn.onHoverLeave = QF.utils.animation.fade(hoverContainer, btn.animDur, 1, 0)
         hoverBorder:SetVertexColor(1, 0.84, 0, 1)
 
-        btn:SetScript('OnLeave', function(self)
+        btn:SetScript('OnLeave', function (self)
             self.onHoverLeave:Play()
             self.text:SetVertexColor(1, 1, 1, 1)
-            self.text:SetFont(QF.default.font, 10, "OUTLINE")
+            self.text:SetFont(QF.default.font, 10, 'OUTLINE')
         end)
-        btn:SetScript('OnEnter', function(self)
+        btn:SetScript('OnEnter', function (self)
             self.onHover:Play()
             self.text:SetVertexColor(0, 0, 0, 1)
-            self.text:SetFont(QF.default.font, 10, "NONE")
+            self.text:SetFont(QF.default.font, 10, 'NONE')
         end)
-        btn:SetScript('OnClick', function()
+        btn:SetScript('OnClick', function ()
             local id = QF.utils.generateNewId()
             QF:SaveData(id, {
                 id = id,
                 created = time()
             })
-            options.options = QF.data
             options:PopulateOptions()
-            options.window.scrollFrame:SetVerticalScroll(options.window.scrollFrame:GetBottomScrollValue())
+            options:ScrollToID(id)
         end)
     end
-    self.options = QF.data
 
     self:CreateSearchInput()
     self:CreateFilters()
     self:PopulateOptions()
     self:PopulateSettings()
     self:CreatePresets()
+
+    C_Timer.After(1, function () ViragDevTool_AddData(self) end)
 end
 
-options.OnDelete = function(id)
-    return function()
-        QF:DeleteByKey(id)
-        options.options = QF.data
-        options:PopulateOptions()
-        options.window.scrollFrame:SetVerticalScroll(options.window.scrollFrame:GetBottomScrollValue())
+options.ScrollToEnd = function (self)
+    self.window.scrollFrame:SetVerticalScroll(self.window.scrollFrame:GetBottomScrollValue())
+end
+
+options.ScrollToStart = function (self)
+    self.window.scrollFrame:SetVerticalScroll(0)
+end
+
+options.ScrollToID = function (self, id)
+    self:ScrollToStart()
+    local scrollTop = self.window.scrollFrame:GetTop()
+    for _, option in ipairs(self.optionFrames) do
+        if (option.optionId == id) then
+            local optionTop = option:GetTop()
+            self.window.scrollFrame:SetVerticalScroll(scrollTop - optionTop)
+            return
+        end
     end
 end
 
-options.PopulateOptions = function(self)
+options.OnDelete = function (id)
+    return function ()
+        QF:DeleteByKey(id)
+        options:PopulateOptions()
+        options:ScrollToStart()
+    end
+end
+
+options.PopulateOptions = function (self)
     optionContainer:DestroyAllOptions()
     self.optionFrames = {}
-    for id, optionData in QF.utils.spairs(self.options, function(t, a, b)
+    for id, optionData in QF.utils.spairs(QF:getAllSuggestions(), function (t, a, b)
         if (t[a].created and t[b].created) then
             return t[a].created < t[b].created
         end
@@ -205,99 +225,110 @@ options.PopulateOptions = function(self)
             end
         end
         if (optionData and eligible) then
-            table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id)))
+            table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id), self))
         end
     end
 
     for index, optionFrame in ipairs(self.optionFrames) do
         if (index == 1) then
-            optionFrame:SetPoint("TOPLEFT", self.window.scrollChild)
-            optionFrame:SetPoint("TOPRIGHT", self.window.scrollChild)
+            optionFrame:SetPoint('TOPLEFT', self.window.scrollChild)
+            optionFrame:SetPoint('TOPRIGHT', self.window.scrollChild)
         else
-            optionFrame:SetPoint("TOPLEFT", self.optionFrames[index - 1], "BOTTOMLEFT")
-            optionFrame:SetPoint("TOPRIGHT", self.optionFrames[index - 1], "BOTTOMRIGHT")
+            optionFrame:SetPoint('TOPLEFT', self.optionFrames[index - 1], 'BOTTOMLEFT')
+            optionFrame:SetPoint('TOPRIGHT', self.optionFrames[index - 1], 'BOTTOMRIGHT')
         end
         optionFrame:SetParent(self.window.scrollChild)
         optionFrame:Show()
     end
 end
 
-options.CreateSearchInput = function(self)
+options.CreateSearchInput = function (self)
     if (self.editBox) then return end
-    local editBox = CreateFrame("EditBox", nil, self.window.container)
+    local editBox = CreateFrame('EditBox', nil, self.window.container)
     self.editBox = editBox
     editBox:SetAutoFocus(false)
-    editBox:SetPoint("TOPLEFT", 30, 0)
+    editBox:SetPoint('TOPLEFT', 30, 0)
     editBox:SetHeight(70)
     editBox:SetWidth(250)
 
     -- BG
-    local tex = editBox:CreateTexture(nil, "BACKGROUND", nil, -5)
+    local tex = editBox:CreateTexture(nil, 'BACKGROUND', nil, -5)
     tex:SetTexture([[Interface/Addons/QuickFind/Media/Texture/bar]])
     tex:SetVertexColor(0, 0, 0, 0.6)
-    tex:SetPoint("TOPLEFT", -40, 8)
-    tex:SetPoint("BOTTOMRIGHT", 40, -8)
+    tex:SetPoint('TOPLEFT', -40, 8)
+    tex:SetPoint('BOTTOMRIGHT', 40, -8)
 
     -- Icon
-    local searchIcon = editBox:CreateTexture(nil, "BACKGROUND", nil, -5)
+    local searchIcon = editBox:CreateTexture(nil, 'BACKGROUND', nil, -5)
     searchIcon:SetTexture([[Interface/Addons/QuickFind/Media/Texture/icon-search]])
     searchIcon:SetVertexColor(1, 1, 1, 0.8)
-    searchIcon:SetPoint("LEFT", -20, 0)
+    searchIcon:SetPoint('LEFT', -20, 0)
     searchIcon:SetSize(16, 16)
 
-    local textFrame = editBox:CreateFontString(nil, "OVERLAY")
-    textFrame:SetFont(QF.default.font, 8, "OUTLINE")
-    textFrame:SetPoint("BOTTOMLEFT", editBox, "TOPLEFT", -20, -14)
+    local textFrame = editBox:CreateFontString(nil, 'OVERLAY')
+    textFrame:SetFont(QF.default.font, 8, 'OUTLINE')
+    textFrame:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', -20, -14)
     textFrame:SetWidth(0)
-    textFrame:SetText("Search")
+    textFrame:SetText('Search')
 
-    editBox:SetFont([[Interface/Addons/QuickFind/Media/Font/Poppins.ttf]], 11, "OUTLINE")
+    editBox:SetFont([[Interface/Addons/QuickFind/Media/Font/Poppins.ttf]], 11, 'OUTLINE')
 
-    editBox:SetScript('OnTextChanged', function(editbox, changed)
+    editBox:SetScript('OnTextChanged', function (editbox, changed)
         if (changed) then
             self.filters['search'] = { type = 'match', value = editbox:GetText() }
             self:SetValue('filters', self.filters)
             options:PopulateOptions()
-            options.window.scrollFrame:SetVerticalScroll(0)
+            options:ScrollToStart();
         end
     end)
     -- Base logic
-    editBox:SetScript("OnEscapePressed", function()
+    editBox:SetScript('OnEscapePressed', function ()
         editBox:ClearFocus()
     end)
 end
 
-options.CreateFilters = function(self)
-    self.filters = {}
+options.ResetFilters = function (self)
+    self:SetValue('filters', {})
+    self.typeDropdown:SetValue('value', '')
+    self.editBox:SetText('')
+    self:PopulateOptions()
+end
 
+options.CreateFilters = function (self)
+    self.filters = {}
+    C_Timer.After(1,
+        function () ViragDevTool_AddData(QF.utils.shallowCloneMerge(QF.typeOptions, { preset = 'Preset' })) end)
     local typeDropdown = dropdown:Get({
         label = 'Type',
-        options = QF.typeOptions,
-        onChange = function(value)
-            self.filters['type'] = { value = value, type = 'exact' }
+        options = QF.utils.shallowCloneMerge(QF.typeOptions, { preset = 'Preset' }),
+        onChange = function (value)
+            if (value == 'preset') then
+                self.filters['isPreset'] = { value = true, type = 'exact' }
+            else
+                self.filters['type'] = { value = value, type = 'exact' }
+                self.filters['isPreset'] = nil
+            end
             self:SetValue('filters', self.filters)
             self:PopulateOptions()
         end,
         width = 130
     }, self.window)
+    self.typeDropdown = typeDropdown
 
-    typeDropdown:SetPoint("LEFT", self.editBox, "RIGHT", 50, 0)
+    typeDropdown:SetPoint('LEFT', self.editBox, 'RIGHT', 50, 0)
 
     local resetBtn = button:Get({
         text = 'Reset',
         width = 80,
         startAlpha = 0.1,
         endAlpha = 1,
-        onClick = function()
-            self:SetValue('filters', {})
-            typeDropdown:SetValue('value', '')
-            self.editBox:SetText('')
-            self:PopulateOptions()
+        onClick = function ()
+            self:ResetFilters()
         end,
         color = { 237 / 255, 26 / 255, 86 / 255, 1 }
     }, self.window);
     resetBtn:Hide()
-    self:Observe('filters', function(value)
+    self:Observe('filters', function (value)
         local hasOptions = false
         for _ in pairs(value) do
             hasOptions = true
@@ -307,12 +338,13 @@ options.CreateFilters = function(self)
         else
             resetBtn:Hide()
         end
+        self:ScrollToStart()
     end)
 
-    resetBtn:SetPoint("LEFT", typeDropdown, "RIGHT", 20, 0)
+    resetBtn:SetPoint('LEFT', typeDropdown, 'RIGHT', 20, 0)
 end
 
-options.PopulateSettings = function(self)
+options.PopulateSettings = function (self)
     local sFrame = self.settings
 
     if (not sFrame.scaleInput) then
@@ -320,12 +352,12 @@ options.PopulateSettings = function(self)
             label = 'Search Scale',
             initial = QF.settings.scale
         }, sFrame.container)
-        scaleInput.onChange = function(value)
+        scaleInput.onChange = function (value)
             if (tonumber(value)) then
                 QF.settings:SetValue('scale', tonumber(value));
             end
         end
-        scaleInput:SetPoint("TOPLEFT", 20, 0)
+        scaleInput:SetPoint('TOPLEFT', 20, 0)
         sFrame.scaleInput = scaleInput
     end
 
@@ -334,26 +366,26 @@ options.PopulateSettings = function(self)
             label = 'Max Available Suggestions',
             initial = QF.settings.maxSuggestions
         }, sFrame.container)
-        maxSuggestions.onChange = function(value)
+        maxSuggestions.onChange = function (value)
             if (tonumber(value)) then
                 QF.settings:SetValue('maxSuggestions', tonumber(value));
             end
         end
-        maxSuggestions:SetPoint("TOPLEFT", sFrame.scaleInput, 'TOPRIGHT', 20, 0)
+        maxSuggestions:SetPoint('TOPLEFT', sFrame.scaleInput, 'TOPRIGHT', 20, 0)
         sFrame.maxSuggestions = maxSuggestions
     end
 end
 
-options.ShowFrame = function(self)
+options.ShowFrame = function (self)
     self.window:ShowWindow()
 end
 
-options.HideFrame = function(self)
+options.HideFrame = function (self)
     self.window:HideWindow()
 end
 
 
-SLASH_QF1, SLASH_QF2 = "/QF", "/QUICKFIND"
+SLASH_QF1, SLASH_QF2 = '/QF', '/QUICKFIND'
 function SlashCmdList.QF(msg)
     options:ShowFrame()
 end

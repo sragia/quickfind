@@ -217,9 +217,10 @@ suggestions.ConfigureFrame = function(self, frame)
         local setCDText = function()
             local start, duration = 0, 0
             if suggestionData.type == QF.LOOKUP_TYPE.SPELL then
-                start, duration = GetSpellCooldown(suggestionData.spellId)
+                local spellInfo = C_Spell.GetSpellCooldown(suggestionData.spellId)
+                start, duration = spellInfo.startTime, spellInfo.duration
             elseif suggestionData.type == QF.LOOKUP_TYPE.ITEM or suggestionData.type == QF.LOOKUP_TYPE.TOY then
-                start, duration = GetItemCooldown(suggestionData.itemId)
+                start, duration = C_Item.GetItemCooldown(suggestionData.itemId)
             end
 
             if (start + duration > GetTime()) then
@@ -322,7 +323,7 @@ suggestions.ConfigureFrame = function(self, frame)
                     self:SetDisabled()
                 end
             elseif (data.type == QF.LOOKUP_TYPE.ITEM) then
-                if (GetItemCount(data.itemId) <= 0) then
+                if (C_Item.GetItemCount(data.itemId) <= 0) then
                     self:SetDisabled()
                 end
             end
@@ -361,7 +362,7 @@ suggestions.SetOnClick = function(self, frame, suggestion)
         end
         if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
             frame:SetAttribute("type", "item")
-            local itemName = GetItemInfo(suggestion.data.itemId)
+            local itemName = C_Item.GetItemInfo(suggestion.data.itemId)
             frame:SetAttribute("item", itemName)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
             frame:SetAttribute("type", "spell")

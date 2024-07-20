@@ -29,6 +29,12 @@ QF.cache = {
     spells = {}
 }
 
+QF.textures = {
+    icon = {
+        edit = [[Interface/Addons/QuickFind/Media/Texture/Frames/edit]]
+    }
+}
+
 QF.default = {
     font = [[Interface/Addons/QuickFind/Media/Font/Poppins.ttf]],
     unknownIcon = [[Interface/Addons/QuickFind/Media/Texture/unknownIcon]],
