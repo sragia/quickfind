@@ -126,8 +126,36 @@ presets.build = function (self)
                     end
                 end
             end
+        elseif (data.type == QF.LOOKUP_TYPE.TOY) then
+            if (data.all) then
+                for i = 1, C_ToyBox.GetNumToys() do
+                    local toyID = C_ToyBox.GetToyFromIndex(i)
+                    if (toyID > 0 and C_ToyBox.IsToyUsable(toyID)) then
+                        local toyData = cache:getToyData(toyID)
+                        if (not toyData) then
+                            local itemID, toyName, icon = C_ToyBox.GetToyInfo(toyID)
+                            toyData = {
+                                itemID = itemID,
+                                toyName = toyName,
+                                icon = icon
+                            }
+                            cache:saveToyData(toyID, toyData)
+                        end
+                        if toyData.toyName and PlayerHasToy(toyData.itemID) then
+                            QF.builtPresets[name][name .. toyID] = addPresetInfo({
+                                icon = toyData.icon,
+                                name = toyData.toyName,
+                                type = QF.LOOKUP_TYPE.TOY,
+                                itemId = toyData.itemID
+                            }, toyID, name)
+                        end
+                    end
+                end
+            end
         end
     end
+
+    QF:GetModule('options-core'):PopulateOptions()
 end
 
 ---@param self Presets
@@ -169,7 +197,10 @@ end
 presets.init = function (self)
     self:fetchSpellCache()
     -- Build at least initial presets
-    self:build()
+    -- Add some arbitrary delay cuz i cba
+    C_Timer.After(2, function ()
+        presets:build()
+    end)
 end
 
 ---@param self Presets

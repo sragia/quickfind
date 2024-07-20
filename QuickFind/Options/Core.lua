@@ -47,6 +47,7 @@ options.CreatePresets = function (self)
             else
                 presets:disable(presetName)
             end
+            self:PopulateOptions()
         end)
         previous = input
     end

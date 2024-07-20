@@ -23,10 +23,11 @@ QF.typeOptions = {
 QF.presets = {}
 QF.builtPresets = {}
 QF.enabledPresets = {
-    ['Instance Portals'] = false
+    ['Instance Portals'] = true -- Just so you have something initially
 }
 QF.cache = {
-    spells = {}
+    spells = {},
+    toys = {}
 }
 
 QF.textures = {

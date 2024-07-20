@@ -1,8 +1,8 @@
 local _, QF = ...
 
 QF.createPreset({
-    type = 'MOUNT',
-    name = 'Mounts',
+    type = 'TOY',
+    name = 'Toys',
     all = true,
     getData = function () return {} end,
 })
