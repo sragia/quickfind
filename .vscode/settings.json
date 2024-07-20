@@ -23,5 +23,9 @@
         "GenerateClosure",
         "show",
         "Settings"
+    ],
+    "emmylua.spell.dict": [
+        "utils",
+        "spairs"
     ]
 }

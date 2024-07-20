@@ -13,8 +13,8 @@ local cache = QF:GetModule('cache')
 ---@param self Presets
 ---@param id string
 ---@return function
-presets.spellCacheCallback = function(self, id)
-    return function(_, spellID, success)
+presets.spellCacheCallback = function (self, id)
+    return function (_, spellID, success)
         if (success) then
             local data = self:getSpellData(spellID)
             if (data) then
@@ -29,7 +29,7 @@ end
 ---@param self Presets
 ---@param spellID number
 ---@return SpellDataItem|false
-presets.getSpellData = function(self, spellID)
+presets.getSpellData = function (self, spellID)
     if (cache:hasSpell(spellID)) then
         return cache:getSpellData(spellID)
     end
@@ -39,11 +39,11 @@ presets.getSpellData = function(self, spellID)
     end
 
     if (C_Spell.IsSpellDataCached(spellID)) then
-        local spellInfo = C_SpellBook.GetSpellInfo(spellID)
-        local spellDescription = GetSpellDescription(spellID)
+        local spellInfo = C_Spell.GetSpellInfo(spellID)
+        local spellDescription = C_Spell.GetSpellDescription(spellID)
         if (not spellDescription) then
             local spell = Spell:CreateFromSpellID(spellID)
-            spell:ContinueOnSpellLoad(function()
+            spell:ContinueOnSpellLoad(function ()
                 local spellData = {
                     spellID = spellID,
                     name = spell:GetSpellName(),
@@ -73,7 +73,7 @@ presets.getSpellData = function(self, spellID)
 end
 
 ---@param self Presets
-presets.fetchSpellCache = function(self)
+presets.fetchSpellCache = function (self)
     for _, data in pairs(QF.presets) do
         if (data.type == QF.LOOKUP_TYPE.SPELL) then
             for _, spellID in pairs(data.data) do
@@ -85,29 +85,69 @@ end
 
 ---Build preset suggestions
 ---@param self Presets
-presets.build = function(self)
+presets.build = function (self)
     for name, data in pairs(QF.presets) do
-        QF.builtPresets[name] = QF.builtPresets[name] or {}
-        for _, spellID in pairs(data.data) do
-            local spellData = self:getSpellData(spellID)
-            if (spellData) then
-                QF.builtPresets[name][name .. spellID] = {
-                    icon = spellData.iconID,
-                    name = spellData.name,
-                    spellId = spellID,
-                    type = QF.LOOKUP_TYPE.SPELL,
-                    tags = spellData.description,
-                    isPreset = true
-                }
+        if (data.type == QF.LOOKUP_TYPE.SPELL) then
+            QF.builtPresets[name] = QF.builtPresets[name] or {}
+            for _, spellID in pairs(data.data) do
+                local spellData = self:getSpellData(spellID)
+                if (spellData) then
+                    QF.builtPresets[name][name .. spellID] = {
+                        icon = spellData.iconID,
+                        name = spellData.name,
+                        spellId = spellID,
+                        type = QF.LOOKUP_TYPE.SPELL,
+                        tags = spellData.description,
+                        isPreset = true,
+                        presetName = name,
+                        presetID = spellID,
+                        created = 999999999999999999999 -- Just so they show up at the end
+                    }
+                end
             end
         end
     end
 end
 
+---@param self Presets
+---@param preset table
+presets.addToData = function (self, preset)
+    local id = QF.utils.generateNewId()
+    QF:SaveData(id, {
+        id = id,
+        created = time(),
+        isPreset = false,
+        name = preset.name,
+        icon = preset.icon,
+        spellId = preset.spellId,
+        type = preset.type,
+        tags = preset.tags,
+        presetName = preset.presetName,
+        presetID = preset.presetID,
+        forceOpen = true
+    })
+    return id
+end
+
+
+---Is Preset already added to data
+---@param self Presets
+---@param presetID string
+---@param presetName string
+---@return boolean
+presets.isAddedToData = function (self, presetID, presetName)
+    for _, v in pairs(QF.data) do
+        if (v.presetName and v.presetName == presetName and v.presetID == presetID) then
+            return true
+        end
+    end
+    return false
+end
+
 ---Get available presets
 ---@param self Presets
 ---@return table
-presets.getAvailable = function(self)
+presets.getAvailable = function (self)
     local available = {}
     for name, _ in pairs(QF.presets) do
         table.insert(available, name)
@@ -117,7 +157,7 @@ presets.getAvailable = function(self)
 end
 
 ---@param self Presets
-presets.init = function(self)
+presets.init = function (self)
     self:fetchSpellCache()
     -- Build at least initial presets
     self:build()
@@ -125,16 +165,16 @@ end
 
 ---@param self Presets
 ---@param name string
-presets.enable = function(self, name)
+presets.enable = function (self, name)
     QF.enabledPresets[name] = true
 end
 
 ---@param self Presets
 ---@param name string
-presets.disable = function(self, name)
+presets.disable = function (self, name)
     QF.enabledPresets[name] = false
 end
 
-presets.isEnabled = function(self, name)
+presets.isEnabled = function (self, name)
     return QF.enabledPresets[name]
 end

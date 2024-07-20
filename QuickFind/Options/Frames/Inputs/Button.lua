@@ -58,7 +58,6 @@ local function ConfigureFrame(f, options)
 end
 
 
----comment
 ---@param self ButtonInput
 ---@param options ButtonOptions
 ---@param parent Frame?

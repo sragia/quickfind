@@ -6,7 +6,7 @@ local moduleName = 'frame-input-dropdown'
 ---@class DropdownInput
 local dropdown = QF:GetModule(moduleName)
 
-dropdown.init = function(self)
+dropdown.init = function (self)
     self.pool = CreateFramePool('Frame', UIParent)
     self.optionItemPool = CreateFramePool('Frame', UIParent)
 end
@@ -19,25 +19,25 @@ local function CreateOption(f, frameOptions)
     )
 
     if (not option.valueDisplay) then
-        local valueDisplay = option:CreateFontString(nil, "OVERLAY")
+        local valueDisplay = option:CreateFontString(nil, 'OVERLAY')
         option.valueDisplay = valueDisplay
-        valueDisplay:SetFont(QF.default.font, 10, "OUTLINE")
-        valueDisplay:SetPoint("LEFT")
+        valueDisplay:SetFont(QF.default.font, 10, 'OUTLINE')
+        valueDisplay:SetPoint('LEFT')
         valueDisplay:SetWidth(0)
 
-        option.SetOption = function(self, value, label)
+        option.SetOption = function (self, value, label)
             option.value = value
             option.valueDisplay:SetText(label)
         end
 
-        local tex = option:CreateTexture(nil, "BACKGROUND")
+        local tex = option:CreateTexture(nil, 'BACKGROUND')
         tex:SetTexture(QF.default.barBg)
         tex:SetVertexColor(0.15, 0.15, 0.15, 1)
-        tex:SetPoint("TOPLEFT", -15, 25)
-        tex:SetPoint("BOTTOMRIGHT", 15, -25)
+        tex:SetPoint('TOPLEFT', -15, 25)
+        tex:SetPoint('BOTTOMRIGHT', 15, -25)
         option.texture = tex
     end
-    option:SetScript("OnMouseDown", function(self)
+    option:SetScript('OnMouseDown', function (self)
         f:SetInputValue(self.value)
         f:SetValue('isOpen', false)
     end)
@@ -49,8 +49,8 @@ local function CreateOption(f, frameOptions)
         hoverContainer.border = hoverBorder
         option.hoverContainer = hoverContainer
         hoverBorder:SetTexture(QF.default.barBorderGlow)
-        hoverBorder:SetPoint("TOPLEFT", -15, 28)
-        hoverBorder:SetPoint("BOTTOMRIGHT", 15, -28)
+        hoverBorder:SetPoint('TOPLEFT', -15, 28)
+        hoverBorder:SetPoint('BOTTOMRIGHT', 15, -28)
         hoverContainer:SetAlpha(0)
         option.animDur = 0.15
         option.onHover = QF.utils.animation.fade(hoverContainer, option.animDur, 0, 1)
@@ -58,10 +58,10 @@ local function CreateOption(f, frameOptions)
         hoverBorder:SetVertexColor(1, 0.84, 0, 1)
     end
 
-    option:SetScript("OnEnter", function(self)
+    option:SetScript('OnEnter', function (self)
         self.onHover:Play()
     end)
-    option:SetScript("OnLeave", function(self) self.onHoverLeave:Play() end)
+    option:SetScript('OnLeave', function (self) self.onHoverLeave:Play() end)
     return option
 end
 
@@ -73,9 +73,9 @@ local function PopulateOptions(f, options, frameOptions)
         count = count + 1
         local option = CreateOption(f, frameOptions)
         option:SetOption(value, label)
-        option:SetPoint("TOPLEFT",
+        option:SetPoint('TOPLEFT',
             previous or f.optionContainer,
-            previous and "BOTTOMLEFT" or "TOPLEFT",
+            previous and 'BOTTOMLEFT' or 'TOPLEFT',
             0,
             previous and -5 or 0
         )
@@ -95,41 +95,42 @@ local function ConfigureFrame(f, options)
     f.options = options.options
 
     if (not f.valueDisplay) then
-        local valueDisplay = f:CreateFontString(nil, "OVERLAY")
+        local valueDisplay = f:CreateFontString(nil, 'OVERLAY')
         f.valueDisplay = valueDisplay
-        valueDisplay:SetFont(QF.default.font, 10, "OUTLINE")
-        valueDisplay:SetPoint("LEFT")
+        valueDisplay:SetFont(QF.default.font, 10, 'OUTLINE')
+        valueDisplay:SetPoint('LEFT')
         valueDisplay:SetWidth(0)
-        f:Observe("value", function(value)
+        valueDisplay:SetText(' ')
+        f:Observe('value', function (value)
             local label = f.options[value] or value
-            valueDisplay:SetText(label)
+            valueDisplay:SetText(label ~= '' and label or ' ')
         end)
 
-        f.SetInputValue = function(self, value)
-            self:SetValue("value", value)
+        f.SetInputValue = function (self, value)
+            self:SetValue('value', value)
             if (self.onChange) then
                 self.onChange(value)
             end
         end
 
-        f:SetScript("OnMouseDown", function()
-            f:SetValue("isOpen", not f.isOpen)
+        f:SetScript('OnMouseDown', function ()
+            f:SetValue('isOpen', not f.isOpen)
         end)
 
-        local tex = f:CreateTexture(nil, "BACKGROUND")
+        local tex = f:CreateTexture(nil, 'BACKGROUND')
         tex:SetTexture(QF.default.barBg)
         tex:SetVertexColor(0, 0, 0, 0.6)
-        tex:SetPoint("TOPLEFT", -15, 5)
-        tex:SetPoint("BOTTOMRIGHT", 15, -5)
+        tex:SetPoint('TOPLEFT', -15, 5)
+        tex:SetPoint('BOTTOMRIGHT', 15, -5)
         f.texture = tex
     end
 
     if (not f.chevron) then
-        local chevron = f:CreateTexture(nil, "OVERLAY")
+        local chevron = f:CreateTexture(nil, 'OVERLAY')
         chevron:SetSize(12, 12)
-        chevron:SetPoint("RIGHT", -5, 0)
+        chevron:SetPoint('RIGHT', -5, 0)
         chevron:SetTexture(QF.default.chevronDown)
-        f:Observe("isOpen", function(value)
+        f:Observe('isOpen', function (value)
             if (value) then
                 f.optionContainer:Show()
                 PopulateOptions(f, f.options, options)
@@ -142,9 +143,9 @@ local function ConfigureFrame(f, options)
     end
 
     if (not f.label and options.label) then
-        local textFrame = f:CreateFontString(nil, "OVERLAY")
-        textFrame:SetFont(QF.default.font, 8, "OUTLINE")
-        textFrame:SetPoint("BOTTOMLEFT", f.valueDisplay, "TOPLEFT", 0, 16)
+        local textFrame = f:CreateFontString(nil, 'OVERLAY')
+        textFrame:SetFont(QF.default.font, 8, 'OUTLINE')
+        textFrame:SetPoint('BOTTOMLEFT', f.valueDisplay, 'TOPLEFT', 0, 16)
         textFrame:SetWidth(0)
         f.label = textFrame
         textFrame:SetText(options.label)
@@ -157,8 +158,8 @@ local function ConfigureFrame(f, options)
         hoverContainer.border = hoverBorder
         f.hoverContainer = hoverContainer
         hoverBorder:SetTexture(QF.default.barBorderGlow)
-        hoverBorder:SetPoint("TOPLEFT", -15, 5)
-        hoverBorder:SetPoint("BOTTOMRIGHT", 15, -5)
+        hoverBorder:SetPoint('TOPLEFT', -15, 5)
+        hoverBorder:SetPoint('BOTTOMRIGHT', 15, -5)
         hoverContainer:SetAlpha(0)
         f.animDur = 0.15
         f.onHover = QF.utils.animation.fade(hoverContainer, f.animDur, 0, 1)
@@ -166,21 +167,21 @@ local function ConfigureFrame(f, options)
         hoverBorder:SetVertexColor(1, 0.84, 0, 1)
     end
 
-    f:SetScript("OnEnter", function(self)
+    f:SetScript('OnEnter', function (self)
         self.onHover:Play()
     end)
-    f:SetScript("OnLeave", function(self) self.onHoverLeave:Play() end)
+    f:SetScript('OnLeave', function (self) self.onHoverLeave:Play() end)
     if (not f.optionContainer) then
-        local optionContainer = CreateFrame("Frame", nil, UIParent)
+        local optionContainer = CreateFrame('Frame', nil, UIParent)
         optionContainer:SetHeight(1)
-        optionContainer:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, 15)
-        optionContainer:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", 0, 15)
-        optionContainer:SetFrameStrata("FULLSCREEN_DIALOG")
+        optionContainer:SetPoint('TOPLEFT', f, 'BOTTOMLEFT', 0, 15)
+        optionContainer:SetPoint('TOPRIGHT', f, 'BOTTOMRIGHT', 0, 15)
+        optionContainer:SetFrameStrata('FULLSCREEN_DIALOG')
         optionContainer:SetFrameLevel(99)
         f.optionContainer = optionContainer
         optionContainer:Hide()
-        optionContainer:SetScript("OnEnter", function() end)
-        optionContainer:SetScript("OnLeave", function() end)
+        optionContainer:SetScript('OnEnter', function () end)
+        optionContainer:SetScript('OnLeave', function () end)
     end
 
     if (options.initial) then
@@ -193,7 +194,7 @@ end
 ---@param options DropdownOptions
 ---@param parent FRAME
 ---@return FRAME
-dropdown.Get = function(self, options, parent)
+dropdown.Get = function (self, options, parent)
     local input = self.pool:Acquire()
     ConfigureFrame(input, options)
     if (parent) then
@@ -201,7 +202,7 @@ dropdown.Get = function(self, options, parent)
     else
         input:SetParent(nil)
     end
-    input.Destroy = function(self)
+    input.Destroy = function (self)
         self.pool:Release(self)
     end
     input:Show()
