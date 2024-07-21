@@ -69,6 +69,7 @@ local function init()
     end
 
     QF.utils.addObserver(QF.settings)
+    QF.utils.addObserver(QF.disabledPresets, true)
     -- Add Any setting changes here
 end
 
@@ -121,7 +122,7 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
         end
         return true
     end) do
-        if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName)) and not v.isNew then
+        if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName) and not preset:isDisabledPreset(v.presetName, v.presetID)) and not v.isNew then
             local eligible = true
             if (filters) then
                 for key, filter in pairs(filters) do
@@ -169,6 +170,7 @@ QF.handler:SetScript('OnEvent', function (self, event, ...)
         QF.settings = QF.utils.tableMerge(QF.settings, QuickFindData.settings or {})
         QF.cache = QF.utils.tableMerge(QF.cache, QuickFindData.cache or {})
         QF.enabledPresets = QuickFindData.enabledPresets or QF.enabledPresets
+        QF.disabledPresets = QuickFindData.disabledPresets or QF.disabledPresets
         QFGLOBAL = QF
         init()
         QF:InitModules()
@@ -187,6 +189,7 @@ QF.handler:SetScript('OnEvent', function (self, event, ...)
             QuickFindData.data = QF.data
             QuickFindData.cache = QF.cache
             QuickFindData.enabledPresets = QF.enabledPresets
+            QuickFindData.disabledPresets = QF.disabledPresets
             QF.settings.observable = nil
             QuickFindData.settings = QF.settings
         end

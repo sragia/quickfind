@@ -44,7 +44,7 @@ QF.createPreset({
                 name = bossData.bossName,
                 icon = QF.textures.icon.boss,
                 tags = bossData.instanceName,
-                ID = 'boss' .. bossData.instanceID .. bossData.encounterID,
+                id = 'boss' .. bossData.instanceID .. bossData.encounterID,
                 lua = [[
                     EncounterJournal_LoadUI();
                     EncounterJournal_OpenJournal(nil, ]] .. bossData.instanceID .. [[,]] .. bossData.ejID .. [[);

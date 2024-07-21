@@ -13,6 +13,8 @@ local button = QF:GetModule('frame-input-button')
 local toggle = QF:GetModule('frame-input-toggle')
 ---@class DropdownInput
 local dropdown = QF:GetModule('frame-input-dropdown')
+---@class TooltipInput
+local tooltip = QF:GetModule('frame-input-tooltip')
 ---@class Presets
 local presets = QF:GetModule('presets')
 
@@ -33,6 +35,22 @@ options.CreatePresets = function (self)
 
     local window = self.presets
 
+    local allPresetDisabledReset = button:Get({
+        text = 'Reset All Disabled Presets',
+        onClick = function ()
+            presets:resetDisabled()
+            options:PopulateOptions()
+        end,
+        width = 160,
+        height = 50,
+        startAlpha = 0,
+        endAlpha = 1,
+        color = { 165 / 255, 30 / 255, 34 / 255, 1 }
+    }, window)
+    allPresetDisabledReset:SetPoint('BOTTOMLEFT', 40, 30)
+
+
+
     local previous = nil
     for _, preset in pairs(presets:getAvailable()) do
         local input = toggle:Get({ text = preset.name, value = presets:isEnabled(preset.name) }, window.container)
@@ -50,13 +68,50 @@ options.CreatePresets = function (self)
             self:PopulateOptions()
         end)
 
-        if (preset.description) then
-            local description = input:CreateFontString(nil, 'OVERLAY')
-            description:SetFont(QF.default.font, 10, 'OUTLINE')
-            description:SetText(preset.description)
-            description:SetVertexColor(0.6, 0.6, 0.6, 1)
-            description:SetPoint('LEFT', input.label, 'RIGHT', 5, 0)
+        local description = input:CreateFontString(nil, 'OVERLAY')
+        description:SetFont(QF.default.font, 10, 'OUTLINE')
+        description:SetText(preset.description)
+        description:SetVertexColor(0.6, 0.6, 0.6, 1)
+        description:SetPoint('LEFT', input.label, 'RIGHT', 5, 0)
+
+        -- Reset button
+        local resetPreset = CreateFrame('Frame', nil, input)
+        resetPreset:SetSize(18, 18)
+        resetPreset:SetPoint('LEFT', description, 'RIGHT', 5, 0)
+        local resetTex = resetPreset:CreateTexture()
+        resetTex:SetTexture(QF.textures.icon.reset)
+        resetTex:SetAllPoints()
+
+        local resetTooltip = tooltip:Get({ text = 'Reset disabled presets' }, resetPreset)
+
+        resetPreset:SetScript('OnMouseDown', function (self)
+            presets:resetDisabled(preset.name)
+            options:PopulateOptions()
+        end)
+
+        resetPreset:SetScript('OnEnter', function ()
+            resetTooltip:ShowTooltip()
+            resetTex:SetVertexColor(165 / 255, 30 / 255, 34 / 255, 1)
+        end)
+
+        resetPreset:SetScript('OnLeave', function ()
+            resetTooltip:HideTooltip()
+            resetTex:SetVertexColor(1, 1, 1, 1)
+        end)
+
+        if (not presets:hasAnyDisabled(preset.name)) then
+            resetPreset:Hide()
         end
+
+        QF.disabledPresets:Observe(preset.name, function ()
+            if (presets:hasAnyDisabled(preset.name)) then
+                resetPreset:Show()
+            else
+                resetPreset:Hide()
+            end
+        end)
+
+
         previous = input
     end
 end
