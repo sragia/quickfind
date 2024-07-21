@@ -136,7 +136,7 @@ options.init = function (self)
     self.presets = presetsFrame
 
 
-    if (not windowFrame.maxSuggestionNotification) then
+    if (not self.notificationTxt) then
         local notificationContainer = CreateFrame('Frame', nil, windowFrame)
         notificationContainer:SetHeight(80)
         local notificationTxt = notificationContainer:CreateFontString(nil, 'OVERLAY')
@@ -152,6 +152,18 @@ options.init = function (self)
             'Options just get really laggy, if we try to show hundreds of options. I hope you understand. But really try filters.')
         notificationTxt2:SetVertexColor(0.4, 0.4, 0.4, 1)
         self.notificationTxt = notificationContainer
+    end
+
+    if (not self.noSuggestionsTxt) then
+        local noSuggestionsNotificationContainer = CreateFrame('Frame', nil, windowFrame)
+        noSuggestionsNotificationContainer:SetHeight(80)
+        local noSuggestionsTxt = noSuggestionsNotificationContainer:CreateFontString(nil, 'OVERLAY')
+        noSuggestionsTxt:SetPoint('CENTER')
+        noSuggestionsTxt:SetFont(QF.default.font, 11, 'OUTLINE')
+        noSuggestionsTxt:SetText(
+            'No suggestions found. Try creating new or enable some presets.')
+        noSuggestionsTxt:SetVertexColor(0.65, 0.65, 0.65, 1)
+        self.noSuggestionsTxt = noSuggestionsNotificationContainer
     end
 
     if (not windowFrame.scrollFrame) then
@@ -298,8 +310,17 @@ options.PopulateOptions = function (self)
     end
 
     self.notificationTxt:ClearAllPoints()
+    self.noSuggestionsTxt:Hide()
+    self.noSuggestionsTxt:ClearAllPoints()
+    self.noSuggestionsTxt:Hide()
     if (#self.optionFrames == optionCap and optionCap < numSuggestions) then
+        self.notificationTxt:Show()
         table.insert(self.optionFrames, self.notificationTxt)
+    end
+
+    if (#self.optionFrames == 0 and QF.utils.isEmpty(self.filters)) then
+        self.noSuggestionsTxt:Show()
+        table.insert(self.optionFrames, self.noSuggestionsTxt)
     end
 
     for index, optionFrame in ipairs(self.optionFrames) do
