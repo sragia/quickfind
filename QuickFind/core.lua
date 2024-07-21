@@ -122,7 +122,6 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
         return true
     end) do
         if (not v.isPreset) or (not preset:isAddedToData(v.presetID, v.presetName)) and not v.isNew then
-            i = i + 1
             local eligible = true
             if (filters) then
                 for key, filter in pairs(filters) do
@@ -141,6 +140,7 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
                 end
             end
             if (eligible) then
+                i = i + 1
                 filtered[k] = v
                 if (maxSuggestions and maxSuggestions <= i) then
                     return filtered

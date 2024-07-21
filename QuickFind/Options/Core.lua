@@ -320,6 +320,7 @@ options.CreateFilters = function (self)
         onChange = function (value)
             if (value == 'preset') then
                 self.filters['isPreset'] = { value = true, type = 'exact' }
+                self.filters['type'] = nil
             else
                 self.filters['type'] = { value = value, type = 'exact' }
                 self.filters['isPreset'] = nil
