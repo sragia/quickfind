@@ -32,7 +32,9 @@ QF.cache = {
 
 QF.textures = {
     icon = {
-        edit = [[Interface/Addons/QuickFind/Media/Texture/Frames/edit]]
+        edit = [[Interface/Addons/QuickFind/Media/Texture/Frames/edit]],
+        interfaceSettings = [[Interface/Addons/QuickFind/Media/Texture/Frames/interfaceSettingsIcon]],
+        boss = [[Interface/Addons/QuickFind/Media/Texture/Frames/bossIcon]]
     }
 }
 

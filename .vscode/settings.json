@@ -22,7 +22,19 @@
         "BOOKTYPE_SPELL",
         "GenerateClosure",
         "show",
-        "Settings"
+        "Settings",
+        "SettingsPanel",
+        "ID",
+        "PVPUIFrame",
+        "GroupFinderFrame_ShowGroupFrame",
+        "RaidFinderFrame",
+        "CollectionsJournal_SetTab",
+        "CollectionsJournal",
+        "ToggleCollectionsJournal",
+        "PVEFrame_ShowFrame",
+        "LFDParentFrame",
+        "EncounterJournal_LoadUI",
+        "EncounterJournal_OpenJournal"
     ],
     "emmylua.spell.dict": [
         "utils",

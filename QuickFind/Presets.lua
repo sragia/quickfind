@@ -152,6 +152,13 @@ presets.build = function (self)
                     end
                 end
             end
+        elseif (data.type == QF.LOOKUP_TYPE.LUA) then
+            if (data.built) then
+                local built = data.getBuiltData()
+                for _, data in pairs(built) do
+                    QF.builtPresets[name][name .. data.ID] = addPresetInfo(data, data.id, name)
+                end
+            end
         end
     end
 
@@ -186,8 +193,8 @@ end
 ---@return table
 presets.getAvailable = function (self)
     local available = {}
-    for name, _ in pairs(QF.presets) do
-        table.insert(available, name)
+    for name, data in pairs(QF.presets) do
+        table.insert(available, { name = name, description = data.description })
     end
 
     return available

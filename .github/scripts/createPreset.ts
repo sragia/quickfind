@@ -2,12 +2,13 @@ import {format} from 'lua-json';
 import { writeFileSync } from "fs";
 
 
-export function createPreset(data: any, name: string, type: 'SPELL'): void {
+export function createPreset(data: any, name: string, type: 'SPELL', description?: string): void {
     const lua = `local _, QF = ...
 
     QF.createPreset({
         type = '${type}',
         name = '${name}',
+        description = '${description || ''}',
         getData = function()
             ${format(data)}
         end

@@ -63,7 +63,7 @@ async function main() {
     const flyoutItems = await parseCsv(csv);
     const portals = flyoutItems.filter(item => portalFlyoutItems.includes(item.SpellFlyoutID)).map(item => item.SpellID);
     
-    createPreset(portals, 'Instance Portals', 'SPELL');
+    createPreset(portals, 'Instance Portals', 'SPELL', 'Adds quick access to all Raid and Dungeon portals');
 }
 
 main()
