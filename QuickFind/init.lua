@@ -25,6 +25,8 @@ QF.builtPresets = {}
 QF.enabledPresets = {
     ['Instance Portals'] = true -- Just so you have something initially
 }
+QF.disabledPresets = {
+}
 QF.cache = {
     spells = {},
     toys = {}
@@ -33,8 +35,10 @@ QF.cache = {
 QF.textures = {
     icon = {
         edit = [[Interface/Addons/QuickFind/Media/Texture/Frames/edit]],
+        disable = [[Interface/Addons/QuickFind/Media/Texture/Frames/disableIcon]],
         interfaceSettings = [[Interface/Addons/QuickFind/Media/Texture/Frames/interfaceSettingsIcon]],
-        boss = [[Interface/Addons/QuickFind/Media/Texture/Frames/bossIcon]]
+        boss = [[Interface/Addons/QuickFind/Media/Texture/Frames/bossIcon]],
+        reset = [[Interface/Addons/QuickFind/Media/Texture/Frames/reset]]
     }
 }
 

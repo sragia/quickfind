@@ -38,6 +38,7 @@
     ],
     "emmylua.spell.dict": [
         "utils",
-        "spairs"
+        "spairs",
+        "tooltip"
     ]
 }

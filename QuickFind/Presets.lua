@@ -156,7 +156,7 @@ presets.build = function (self)
             if (data.built) then
                 local built = data.getBuiltData()
                 for _, data in pairs(built) do
-                    QF.builtPresets[name][name .. data.ID] = addPresetInfo(data, data.id, name)
+                    QF.builtPresets[name][name .. data.id] = addPresetInfo(data, data.id, name)
                 end
             end
         end
@@ -186,6 +186,48 @@ presets.isAddedToData = function (self, presetID, presetName)
         end
     end
     return false
+end
+
+---Disable specific preset
+---@param self Presets
+---@param presetName string
+---@param presetID string
+presets.setDisabledPreset = function (self, presetName, presetID)
+    QF.disabledPresets[presetName] = QF.disabledPresets[presetName] or {}
+    QF.disabledPresets[presetName][presetID] = true
+    QF.disabledPresets:SetValue(presetName, QF.disabledPresets[presetName])
+end
+
+---Is specific preset disabled
+---@param self Presets
+---@param presetName string
+---@param presetID string
+---@return boolean
+presets.isDisabledPreset = function (self, presetName, presetID)
+    return QF.disabledPresets[presetName] and QF.disabledPresets[presetName][presetID]
+end
+
+---Reset all or specific disabled presets
+---@param self Presets
+---@param presetName? string
+presets.resetDisabled = function (self, presetName)
+    if presetName then
+        QF.disabledPresets:SetValue(presetName, {})
+    else
+        for key, t in pairs(QF.disabledPresets) do
+            if (key ~= 'observable' and type(t) == 'table') then
+                QF.disabledPresets:SetValue(key, {})
+            end
+        end
+    end
+end
+
+---Does preset has any disabled presets
+---@param self Presets
+---@param presetName string
+---@return boolean
+presets.hasAnyDisabled = function (self, presetName)
+    return QF.disabledPresets[presetName] and not QF.utils.isEmpty(QF.disabledPresets[presetName])
 end
 
 ---Get available presets

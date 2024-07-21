@@ -37,6 +37,12 @@ QF.utils = {
         table.sort(suggestions, function (a, b) return a.score < b.score end)
         return suggestions
     end,
+    isEmpty = function (t)
+        for _ in pairs(t) do
+            return false
+        end
+        return true
+    end,
     transformSource = function (source)
         local t = {}
         for _, v in pairs(source) do
@@ -172,8 +178,8 @@ QF.utils = {
         end
         return string.format('%02d:%02d', minutes, seconds)
     end,
-    addObserver = function (t)
-        if (t.observable) then
+    addObserver = function (t, force)
+        if (t.observable and not force) then
             return t
         end
 

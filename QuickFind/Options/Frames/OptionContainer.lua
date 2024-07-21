@@ -13,7 +13,10 @@ local windowCreator = QF:GetModule('frame-window')
 -- Inputs
 local textInput = QF:GetModule('frame-input-text')
 local dropdown = QF:GetModule('frame-input-dropdown')
+---@class ButtonInput
 local button = QF:GetModule('frame-input-button')
+---@class TooltipInput
+local tooltip = QF:GetModule('frame-input-tooltip')
 local luaEditor = QF:GetModule('frame-input-lua')
 
 local optionHeight, optionHeightOpen = 50, 170
@@ -169,7 +172,8 @@ local function AddOptions(f, data)
     if not bodyFrame.tags then
         local input = textInput:Get({
             label = 'Tags',
-            initial = data.tags
+            initial = data.tags,
+            tooltip = 'Gets taken into account while searching'
         }, bodyFrame);
         bodyFrame.tags = input
         table.insert(f.inputTypes, {
@@ -519,11 +523,16 @@ local function ConfigureFrame(f)
             f.optionParent:ScrollToID(id)
         end)
 
+
+        local editTooltip = tooltip:Get({ text = 'Edit Preset' }, editBtn)
+
         editBtn:SetScript('OnEnter', function ()
+            editTooltip:ShowTooltip()
             editTex:SetVertexColor(1, 0.84, 0, 1)
         end)
 
         editBtn:SetScript('OnLeave', function ()
+            editTooltip:HideTooltip()
             editTex:SetVertexColor(1, 1, 1, 1)
         end)
 
@@ -538,9 +547,44 @@ local function ConfigureFrame(f)
         end)
     end
 
+    if (not f.disablePreset) then
+        local disablePreset = CreateFrame('Frame', nil, f.bg)
+        disablePreset:SetSize(18, 18)
+        disablePreset:SetPoint('RIGHT', f.editBtn, 'LEFT', -20, 0)
+        local disableTex = disablePreset:CreateTexture()
+        disableTex:SetTexture(QF.textures.icon.disable)
+        disableTex:SetAllPoints()
+
+        local disabledTooltip = tooltip:Get({ text = 'Disable Preset' }, disablePreset)
+
+        disablePreset:SetScript('OnMouseDown', function (self)
+            preset:setDisabledPreset(f.data.presetName, f.data.presetID)
+            f.optionParent:PopulateOptions()
+        end)
+
+        disablePreset:SetScript('OnEnter', function ()
+            disabledTooltip:ShowTooltip()
+            disableTex:SetVertexColor(165 / 255, 30 / 255, 34 / 255, 1)
+        end)
+
+        disablePreset:SetScript('OnLeave', function ()
+            disabledTooltip:HideTooltip()
+            disableTex:SetVertexColor(1, 1, 1, 1)
+        end)
+
+        f.disablePreset = disablePreset
+        f:Observe('data', function (data)
+            if (data.isPreset) then
+                disablePreset:Show()
+            else
+                disablePreset:Hide()
+            end
+        end)
+    end
+
     if (not f.isPreset) then
         local presetContainer = CreateFrame('Frame', nil, f.bg)
-        presetContainer:SetPoint('RIGHT', f.editBtn, -30, 0)
+        presetContainer:SetPoint('RIGHT', f.disablePreset, 'LEFT', -20, 0)
         presetContainer:SetSize(1, 1)
 
         local isPresetText = presetContainer:CreateFontString(nil, 'OVERLAY')

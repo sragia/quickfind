@@ -18,7 +18,7 @@ QF.createPreset({
                 type = QF.LOOKUP_TYPE.LUA,
                 name = 'Open ' .. category:GetName() .. ' settings',
                 icon = QF.textures.icon.interfaceSettings,
-                ID = 'category' .. category:GetID(),
+                id = 'category' .. category:GetID(),
                 lua = lua
             })
         end
@@ -28,21 +28,21 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Talents',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'talents',
+            id = 'talents',
             lua = 'PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassTalents);'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Spell Book',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'spellbook',
+            id = 'spellbook',
             lua = 'PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.SpellBook);'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Specialization',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'specializations',
+            id = 'specializations',
             lua = 'PlayerSpellsUtil.TogglePlayerSpellsFrame(PlayerSpellsUtil.FrameTabs.ClassSpecializations);'
         })
 
@@ -51,63 +51,63 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Character',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'character',
+            id = 'character',
             lua = 'ToggleCharacter("PaperDollFrame");'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Reputations',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'reputations',
+            id = 'reputations',
             lua = 'ToggleCharacter("ReputationFrame");'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Currencies',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'currencies',
+            id = 'currencies',
             lua = 'CharacterFrame:ToggleTokenFrame();'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Professions',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'professions',
+            id = 'professions',
             lua = 'ShowUIPanel(ProfessionsBookFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Addons',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'addons',
+            id = 'addons',
             lua = 'ShowUIPanel(AddonList)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Achievements',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'achievements',
+            id = 'achievements',
             lua = 'ShowUIPanel(AchievementsFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Achievements',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'achievements',
+            id = 'achievements',
             lua = 'ShowUIPanel(AchievementsFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Guild Chat',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'guildchat',
+            id = 'guildchat',
             lua = 'ShowUIPanel(CommunitiesFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open LFD',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'LFD',
+            id = 'LFD',
             lua = [[
             if (PVEFrame and not PVEFrame:IsShown()) then
                 PVEFrame_ToggleFrame();
@@ -119,7 +119,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Premade Groups (PVE)',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'LFG',
+            id = 'LFG',
             lua = [[
             if (PVEFrame and not PVEFrame:IsShown()) then
                 PVEFrame_ToggleFrame();
@@ -130,7 +130,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open LFR',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'LFR',
+            id = 'LFR',
             lua = [[
             if (PVEFrame and not PVEFrame:IsShown()) then
                 PVEFrame_ToggleFrame();
@@ -141,35 +141,35 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Quick Match PVP',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'quickmatch',
+            id = 'quickmatch',
             lua = 'PVEFrame_ShowFrame(\'PVPUIFrame\'); PVPQueueFrame_ShowFrame(HonorFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Rated PVP',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'ratedpvp',
+            id = 'ratedpvp',
             lua = 'PVEFrame_ShowFrame(\'PVPUIFrame\'); PVPQueueFrame_ShowFrame(ConquestFrame)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Premade Groups (PVP)',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'lfgpvp',
+            id = 'lfgpvp',
             lua = 'PVEFrame_ShowFrame(\'PVPUIFrame\'); PVPQueueFrame_ShowFrame(LFGListPVPStub)'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Mythic+ Dungeons',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'mythicplusdungeons',
+            id = 'mythicplusdungeons',
             lua = 'PVEFrame_ShowFrame(\'ChallengesFrame\');'
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Mounts',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'mounts',
+            id = 'mounts',
             lua = [[
             if (not CollectionsJournal or CollectionsJournal and not CollectionsJournal:IsShown()) then
                 ToggleCollectionsJournal();
@@ -181,7 +181,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Pets',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'pets',
+            id = 'pets',
             lua = [[
             if (not CollectionsJournal or CollectionsJournal and not CollectionsJournal:IsShown()) then
                 ToggleCollectionsJournal();
@@ -193,7 +193,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Toys',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'toys',
+            id = 'toys',
             lua = [[
             if (not CollectionsJournal or CollectionsJournal and not CollectionsJournal:IsShown()) then
                 ToggleCollectionsJournal();
@@ -205,7 +205,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Heirlooms',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'heirlooms',
+            id = 'heirlooms',
             lua = [[
             if (not CollectionsJournal or CollectionsJournal and not CollectionsJournal:IsShown()) then
                 ToggleCollectionsJournal();
@@ -217,7 +217,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open Wardrobe',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'wardrobe',
+            id = 'wardrobe',
             lua = [[
             if (not CollectionsJournal or CollectionsJournal and not CollectionsJournal:IsShown()) then
                 ToggleCollectionsJournal();
@@ -229,7 +229,7 @@ QF.createPreset({
             type = QF.LOOKUP_TYPE.LUA,
             name = 'Open EncounterJournal',
             icon = QF.textures.icon.interfaceSettings,
-            ID = 'encounterjournal',
+            id = 'encounterjournal',
             lua = 'ToggleEncounterJournal()'
         })
 
