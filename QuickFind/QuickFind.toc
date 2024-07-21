@@ -18,8 +18,10 @@ Cache.lua
 
 # Presets
 Presets/Instance_Portals.lua
+Presets/Interface.lua
 Presets/Mounts.lua
 Presets/Toys.lua
+Presets/Bosses.lua
 Presets.lua
 
 # Options

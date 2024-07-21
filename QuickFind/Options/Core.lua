@@ -34,8 +34,8 @@ options.CreatePresets = function (self)
     local window = self.presets
 
     local previous = nil
-    for _, presetName in pairs(presets:getAvailable()) do
-        local input = toggle:Get({ text = presetName, value = presets:isEnabled(presetName) }, window.container)
+    for _, preset in pairs(presets:getAvailable()) do
+        local input = toggle:Get({ text = preset.name, value = presets:isEnabled(preset.name) }, window.container)
         if (previous) then
             input:SetPoint('TOPLEFT', previous, 0, -30)
         else
@@ -43,12 +43,20 @@ options.CreatePresets = function (self)
         end
         input:Observe('value', function (value)
             if (value) then
-                presets:enable(presetName)
+                presets:enable(preset.name)
             else
-                presets:disable(presetName)
+                presets:disable(preset.name)
             end
             self:PopulateOptions()
         end)
+
+        if (preset.description) then
+            local description = input:CreateFontString(nil, 'OVERLAY')
+            description:SetFont(QF.default.font, 10, 'OUTLINE')
+            description:SetText(preset.description)
+            description:SetVertexColor(0.6, 0.6, 0.6, 1)
+            description:SetPoint('LEFT', input.label, 'RIGHT', 5, 0)
+        end
         previous = input
     end
 end

@@ -3,6 +3,7 @@ local _, QF = ...
     QF.createPreset({
         type = 'SPELL',
         name = 'Instance Portals',
+        description = 'Adds quick access to all Raid and Dungeon portals',
         getData = function()
             return {
   '131232',
