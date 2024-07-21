@@ -281,7 +281,7 @@ options.OnDelete = function (id)
     end
 end
 
-local optionCap = 80
+local optionCap = 70
 options.PopulateOptions = function (self)
     optionContainer:DestroyAllOptions()
     self.optionFrames = {}
