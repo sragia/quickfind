@@ -124,7 +124,7 @@ QF.createPreset({
             if (PVEFrame and not PVEFrame:IsShown()) then
                 PVEFrame_ToggleFrame();
             end
-            GroupFinderFrame_ShowGroupFrame(LFGListPVEStub)']]
+            GroupFinderFrame_ShowGroupFrame(LFGListPVEStub)]]
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
@@ -135,7 +135,7 @@ QF.createPreset({
             if (PVEFrame and not PVEFrame:IsShown()) then
                 PVEFrame_ToggleFrame();
             end
-            GroupFinderFrame_ShowGroupFrame(RaidFinderFrame)']]
+            GroupFinderFrame_ShowGroupFrame(RaidFinderFrame)]]
         })
         table.insert(data, {
             type = QF.LOOKUP_TYPE.LUA,
