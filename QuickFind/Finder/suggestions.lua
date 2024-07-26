@@ -360,9 +360,9 @@ suggestions.SetOnClick = function (self, frame, suggestion)
             frame:ClearSecure()
         end
         if (suggestion.data.type == QF.LOOKUP_TYPE.TOY or suggestion.data.type == QF.LOOKUP_TYPE.ITEM) then
-            frame:SetAttribute('type', 'macro')
+            frame:SetAttribute('type', 'item')
             local itemName = C_Item.GetItemInfo(suggestion.data.itemId)
-            frame:SetAttribute('macrotext', '/use ' .. (itemName or suggestion.data.itemId))
+            frame:SetAttribute('item', itemName or suggestion.data.itemId)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.SPELL) then
             frame:SetAttribute('type', 'spell')
             frame:SetAttribute('spell', suggestion.data.spellId)
