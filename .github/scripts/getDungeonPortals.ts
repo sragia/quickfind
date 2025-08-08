@@ -39,7 +39,8 @@ const portalFlyoutItems = [
     '227', // DF dung
     '230', // Cata
     '231', // DF Raid
-    '232' // TWW
+    '232', // TWW
+    '242', // TWW Raids
 ]
 
 function parseCsv(csv: string): Promise<FlyoutItemsTableItem[]> {
