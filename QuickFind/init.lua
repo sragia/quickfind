@@ -1,6 +1,14 @@
 ---@class QF
 local QF = select(2, ...)
 
+---@class ExalityFrames
+local EXFrames = QF.EXFrames
+
+EXFrames:Configure({
+    logoPath = [[Interface/Addons/QuickFind/Media/Texture/logo_icon.png]],
+    defaultFontPath = [[Interface/Addons/QuickFind/Media/Font/Poppins.ttf]],
+})
+
 QuickFind = {}
 QuickFindData = {}
 
@@ -63,8 +71,6 @@ QF.default = {
     optionClosedBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionClosedBg]],
     optionBodyBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionBodyBg]],
     toggle = [[Interface/Addons/QuickFind/Media/Texture/Frames/toggle]],
-    buttonBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/button-bg.png]],
-    buttonHover = [[Interface/Addons/QuickFind/Media/Texture/Frames/button-hover.png]],
     maxSuggestions = 5,
     scale = 1.35,
     tagColors = {

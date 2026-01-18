@@ -35,7 +35,8 @@
         "LFDParentFrame",
         "EncounterJournal_LoadUI",
         "EncounterJournal_OpenJournal",
-        "CreateKeyChordStringUsingMetaKeyState"
+        "CreateKeyChordStringUsingMetaKeyState",
+        "FindInTable"
     ],
     "emmylua.spell.dict": [
         "utils",

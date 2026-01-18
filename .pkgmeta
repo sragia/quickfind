@@ -1,13 +1,18 @@
 package-as: QuickFind
 
+externals:
+  QuickFind/ExalityFrames:
+    url: https://github.com/sragia/ExalityFrames
+    tag: 1.0.1
+
 enable-nolib-creation: no
 
 ignore:
   - generate_changelog.sh
 
 manual-changelog:
- filename: CHANGELOG.md
- markup-type: markdown
+  filename: CHANGELOG.md
+  markup-type: markdown
 
 move-folders:
   QuickFind/QuickFind: QuickFind
