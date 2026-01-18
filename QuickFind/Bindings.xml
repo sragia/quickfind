@@ -1,5 +1,5 @@
 <Bindings>
-  <Binding name="Open Suggestions" Category="QuickFind" default="CTRL-P">
+  <Binding name="Open Suggestions" Category="QuickFind" searchTags="BINDING_TAG_QUICKFIND" default="CTRL-P">
     QuickFind.OpenSuggestions()
   </Binding>
 </Bindings>

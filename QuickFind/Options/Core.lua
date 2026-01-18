@@ -15,6 +15,8 @@ local toggle = QF:GetModule('frame-input-toggle')
 local dropdown = QF:GetModule('frame-input-dropdown')
 ---@class TooltipInput
 local tooltip = QF:GetModule('frame-input-tooltip')
+---@class Keybind
+local keybind = QF:GetModule('keybind-frame')
 ---@class Presets
 local presets = QF:GetModule('presets')
 
@@ -466,6 +468,50 @@ options.PopulateSettings = function (self)
         end
         maxSuggestions:SetPoint('TOPLEFT', sFrame.scaleInput, 'TOPRIGHT', 20, 0)
         sFrame.maxSuggestions = maxSuggestions
+    end
+
+    if (not sFrame.keybind) then
+        local clearBinding = function ()
+            local key1, key2 = GetBindingKey('Open Suggestions')
+            if (key1) then
+                SetBinding(key1)
+            end
+            if (key2) then
+                SetBinding(key2)
+            end
+
+            SaveBindings(GetCurrentBindingSet())
+        end
+
+        local setBinding = function (key, f)
+            if (InCombatLockdown()) then
+                return
+            end
+
+            key = strupper(key)
+            local action = GetBindingAction(key)
+            if (action and action ~= '' and action ~= 'Open Suggestions') then
+                print('Keybind already set for action: ' .. action)
+                return false
+            else
+                -- Clear the old binding first
+                clearBinding()
+                if (SetBinding(key, 'Open Suggestions')) then
+                    SaveBindings(GetCurrentBindingSet())
+                    return true
+                else
+                    print('Failed to set keybind')
+                    return false
+                end
+            end
+        end
+        local keyBindingBtb = keybind:Create({
+            name = 'Key Binding',
+            onChange = setBinding,
+            onClear = clearBinding,
+            keybind = GetBindingKey('Open Suggestions') or 'CTRL-P (Default)'
+        }, sFrame.container);
+        keyBindingBtb:SetPoint('TOPLEFT', sFrame.scaleInput, 'BOTTOMLEFT', 0, -20)
     end
 end
 

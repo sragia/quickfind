@@ -34,7 +34,8 @@
         "PVEFrame_ShowFrame",
         "LFDParentFrame",
         "EncounterJournal_LoadUI",
-        "EncounterJournal_OpenJournal"
+        "EncounterJournal_OpenJournal",
+        "CreateKeyChordStringUsingMetaKeyState"
     ],
     "emmylua.spell.dict": [
         "utils",

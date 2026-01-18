@@ -4,6 +4,8 @@ local QF = select(2, ...)
 QuickFind = {}
 QuickFindData = {}
 
+BINDING_TAG_QUICKFIND = 'QuickFind'
+
 QF.LOOKUP_TYPE = {
     SPELL = 'SPELL',
     TOY = 'TOY',
@@ -61,6 +63,8 @@ QF.default = {
     optionClosedBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionClosedBg]],
     optionBodyBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/optionBodyBg]],
     toggle = [[Interface/Addons/QuickFind/Media/Texture/Frames/toggle]],
+    buttonBg = [[Interface/Addons/QuickFind/Media/Texture/Frames/button-bg.png]],
+    buttonHover = [[Interface/Addons/QuickFind/Media/Texture/Frames/button-hover.png]],
     maxSuggestions = 5,
     scale = 1.35,
     tagColors = {

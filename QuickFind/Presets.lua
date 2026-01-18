@@ -69,17 +69,6 @@ presets.getSpellData = function (self, spellID)
     end
 end
 
----@param self Presets
-presets.fetchSpellCache = function (self)
-    for _, data in pairs(QF.presets) do
-        if (data.type == QF.LOOKUP_TYPE.SPELL) then
-            for _, spellID in pairs(data.data) do
-                self:getSpellData(spellID)
-            end
-        end
-    end
-end
-
 local function addPresetInfo(data, ID, name)
     return QF.utils.shallowCloneMerge(data, {
         isPreset = true,
@@ -254,7 +243,6 @@ end
 
 ---@param self Presets
 presets.init = function (self)
-    --self:fetchSpellCache()
     -- Build at least initial presets
     -- Add some arbitrary delay cuz i cba
     C_Timer.After(5, function () presets:build() end)
