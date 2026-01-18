@@ -10,10 +10,13 @@
 # Libraries
 ForAllIndentsAndPurposes.lua
 
+ExalityFrames/ExalityFrames.xml
+
 # Core Functionality
 Init.lua
 Util.lua
 Core.lua
+Welcome.lua
 Cache.lua
 
 # Presets
@@ -32,7 +35,6 @@ Options/Frames/Inputs/Tooltip.lua
 Options/Frames/Inputs/Button.lua
 Options/Frames/Inputs/Toggle.lua
 Options/Frames/Inputs/LuaEditor.lua
-Options/Frames/Inputs/Keybind.lua
 Options/Frames/OptionContainer.lua
 Options/Core.lua
 

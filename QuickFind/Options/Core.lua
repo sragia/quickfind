@@ -2,6 +2,9 @@
 local QF = select(2, ...)
 local moduleName = 'options-core'
 
+---@class ExalityFrames
+local EXFrames = QF.EXFrames
+
 local options = QF:GetModule(moduleName)
 -- Frames
 local window = QF:GetModule('frame-window')
@@ -16,7 +19,7 @@ local dropdown = QF:GetModule('frame-input-dropdown')
 ---@class TooltipInput
 local tooltip = QF:GetModule('frame-input-tooltip')
 ---@class Keybind
-local keybind = QF:GetModule('keybind-frame')
+local keybind = EXFrames:GetFrame('keybind-frame')
 ---@class Presets
 local presets = QF:GetModule('presets')
 

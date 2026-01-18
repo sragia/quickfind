@@ -71,6 +71,11 @@ local function init()
     QF.utils.addObserver(QF.settings)
     QF.utils.addObserver(QF.disabledPresets, true)
     -- Add Any setting changes here
+
+    if (not QF.settings.welcomeShown) then
+        QF:GetModule('welcome-frame'):Show()
+        QF.settings.welcomeShown = true
+    end
 end
 
 QF.SaveData = function (self, id, data)
