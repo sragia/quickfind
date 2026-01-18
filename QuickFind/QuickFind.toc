@@ -32,6 +32,7 @@ Options/Frames/Inputs/Tooltip.lua
 Options/Frames/Inputs/Button.lua
 Options/Frames/Inputs/Toggle.lua
 Options/Frames/Inputs/LuaEditor.lua
+Options/Frames/Inputs/Keybind.lua
 Options/Frames/OptionContainer.lua
 Options/Core.lua
 
