@@ -36,7 +36,11 @@
         "EncounterJournal_LoadUI",
         "EncounterJournal_OpenJournal",
         "CreateKeyChordStringUsingMetaKeyState",
-        "FindInTable"
+        "FindInTable",
+        "CountTable",
+        "Round",
+        "ipairs_reverse",
+        "PixelUtil"
     ],
     "emmylua.spell.dict": [
         "utils",
