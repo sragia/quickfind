@@ -40,7 +40,8 @@
         "CountTable",
         "Round",
         "ipairs_reverse",
-        "PixelUtil"
+        "PixelUtil",
+        "ColorPickerFrame"
     ],
     "emmylua.spell.dict": [
         "utils",

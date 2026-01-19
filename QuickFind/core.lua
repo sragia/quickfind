@@ -192,12 +192,14 @@ QF.handler:SetScript('OnEvent', function (self, event, ...)
         if QF.data and next(QF.data) ~= nil then
             QuickFindData = QuickFindData or {}
             QuickFindData.data = QF.data
-            QuickFindData.cache = QF.cache
-            QuickFindData.enabledPresets = QF.enabledPresets
-            QuickFindData.disabledPresets = QF.disabledPresets
-            QF.settings.observable = nil
-            QuickFindData.settings = QF.settings
         end
+        QuickFindData.cache = QF.cache
+        QuickFindData.enabledPresets = QF.enabledPresets
+        QuickFindData.disabledPresets = QF.disabledPresets
+        QF.settings.observable = nil
+        QuickFindData.settings = QF.settings
         return
     end
 end)
+
+TEST_QF = QF
