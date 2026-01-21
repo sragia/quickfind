@@ -222,7 +222,9 @@ suggestions.ConfigureFrame = function (self, frame)
             if suggestionData.type == QF.LOOKUP_TYPE.SPELL then
                 local spellInfo = C_Spell.GetSpellCooldown(
                     suggestionData.spellId)
-                start, duration = spellInfo.startTime, spellInfo.duration
+                if (spellInfo) then
+                    start, duration = spellInfo.startTime, spellInfo.duration
+                end
             elseif suggestionData.type == QF.LOOKUP_TYPE.ITEM or
                 suggestionData.type == QF.LOOKUP_TYPE.TOY then
                 start, duration = C_Item.GetItemCooldown(suggestionData.itemId)
