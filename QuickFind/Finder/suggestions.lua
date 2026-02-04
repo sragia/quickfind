@@ -6,6 +6,8 @@ local moduleName = 'suggestions'
 local finder = QF:GetModule('finder')
 local suggestions = QF:GetModule(moduleName)
 
+suggestions.suggestions = nil
+
 suggestions.init = function (self)
     self.suggestionContainer = CreateFrame('Frame', 'QFSuggestionsContainer',
         UIParent)
@@ -48,6 +50,7 @@ suggestions.Hide = function (self)
         self:ClearBindings()
         self.suggestionContainer.fadeOut:Play()
     end
+    self:ClearSuggestions()
 end
 
 suggestions.Show = function (self)
@@ -62,15 +65,29 @@ suggestions.Show = function (self)
     end
 end
 
+suggestions.GetSuggestions = function (self)
+    if (self.suggestions) then
+        return self.suggestions
+    end
+    self.suggestions = QF:getAllSuggestions()
+    return self.suggestions
+end
+
+suggestions.ClearSuggestions = function (self)
+    self.suggestions = nil
+end
+
 suggestions.Refresh = function (self, value)
-    local suggestions = QF.utils.suggestMatch(value, QF:getAllSuggestions())
+    local suggestions = QF.utils.suggestMatch(value, self:GetSuggestions())
     self.buttonPool:ReleaseAll()
     self.activeButtons = {}
     for index, suggestion in ipairs(suggestions) do
         if (index > QF.settings.maxSuggestions) then break end
         local f = self.buttonPool:Acquire()
         f:SetPropagateKeyboardInput(true)
-        self:ConfigureFrame(f)
+        if (not f.isConfigured) then
+            self:ConfigureFrame(f)
+        end
         f.index = index
         f.suggestion = suggestion
         f.selected = index == 1
@@ -95,126 +112,125 @@ suggestions.ConfigureFrame = function (self, frame)
     frame:SetFrameStrata('DIALOG')
     frame.hoverColor = { 1, 0.84, 0, 1 }
     frame.isDisabledColor = { 0.30, 0.30, 0.30, 1 }
-    frame.isDisabled = false
     frame.attributes = {}
 
-    if (not frame.bg) then
-        -- BG
-        local tex = frame:CreateTexture()
-        frame.bg = tex
-        tex:SetTexture(QF.default.barBg)
-        tex:SetVertexColor(0, 0, 0, 0.6)
-        tex:SetPoint('CENTER', -80)
-        tex:SetHeight(75)
-        tex:SetWidth(350)
+    -- BG
+    local tex = frame:CreateTexture()
+    frame.bg = tex
+    tex:SetTexture(QF.default.barBg)
+    tex:SetVertexColor(0, 0, 0, 0.6)
+    tex:SetPoint('CENTER', -80)
+    tex:SetHeight(75)
+    tex:SetWidth(350)
+
+
+    local iconContainer = CreateFrame('Frame')
+    iconContainer:SetParent(frame)
+    iconContainer:SetSize(18, 18)
+    iconContainer:SetPoint('LEFT', 5, 0)
+    local icon = iconContainer:CreateTexture()
+    icon:SetAllPoints()
+    icon:SetSize(18, 18)
+    icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+
+    local mask = iconContainer:CreateMaskTexture()
+    mask:SetTexture([[Interface/Addons/QuickFind/Media/Texture/icon-mask]])
+    mask:SetAllPoints();
+
+    icon:AddMaskTexture(mask)
+
+    frame.icon = iconContainer;
+    frame.SetIcon = function (_, iconId) icon:SetTexture(iconId) end
+    frame.SetDesatured = function (self, value)
+        icon:SetDesaturated(value)
     end
 
-    if (not frame.icon) then
-        local iconContainer = CreateFrame('Frame')
-        iconContainer:SetParent(frame)
-        iconContainer:SetSize(18, 18)
-        iconContainer:SetPoint('LEFT', 5, 0)
-        local icon = iconContainer:CreateTexture()
-        icon:SetAllPoints()
-        icon:SetSize(18, 18)
-        icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    local tagContainer = CreateFrame('Frame')
+    tagContainer:SetParent(frame)
+    tagContainer:SetPoint('LEFT', frame.icon, 'RIGHT', 10, 0)
+    tagContainer:SetSize(1, 1)
 
-        local mask = iconContainer:CreateMaskTexture()
-        mask:SetTexture([[Interface/Addons/QuickFind/Media/Texture/icon-mask]])
-        mask:SetAllPoints();
+    local tag = tagContainer:CreateFontString(nil, 'OVERLAY')
+    tag:SetFont(QF.default.font, 6, 'OUTLINE')
+    tag:SetPoint('LEFT')
+    tag:SetWidth(0)
 
-        icon:AddMaskTexture(mask)
+    local tagTexture = tagContainer:CreateTexture()
+    tagTexture:SetTexture(QF.default.barBg)
+    tagTexture:SetPoint('CENTER')
+    tagTexture:SetHeight(23)
+    tagTexture:SetPoint('LEFT', tag, -5, 0)
+    tagTexture:SetPoint('RIGHT', tag, 5, 0)
+    tagTexture:SetVertexColor(0.44, 0, 0.94)
+    frame.tag = tag
 
-        frame.icon = iconContainer;
-        frame.SetIcon = function (_, iconId) icon:SetTexture(iconId) end
-        frame.SetDesatured = function (self, value)
-            icon:SetDesaturated(value)
-        end
-    end
-    frame:SetDesatured(false)
-
-    if (not frame.tag) then
-        local tagContainer = CreateFrame('Frame')
-        tagContainer:SetParent(frame)
-        tagContainer:SetPoint('LEFT', frame.icon, 'RIGHT', 10, 0)
-        tagContainer:SetSize(1, 1)
-
-        local tag = tagContainer:CreateFontString(nil, 'OVERLAY')
-        tag:SetFont(QF.default.font, 6, 'OUTLINE')
-        tag:SetPoint('LEFT')
-        tag:SetWidth(0)
-
-        local tagTexture = tagContainer:CreateTexture()
-        tagTexture:SetTexture(QF.default.barBg)
-        tagTexture:SetPoint('CENTER')
-        tagTexture:SetHeight(23)
-        tagTexture:SetPoint('LEFT', tag, -5, 0)
-        tagTexture:SetPoint('RIGHT', tag, 5, 0)
-        tagTexture:SetVertexColor(0.44, 0, 0.94)
-
-        frame.tag = tag
-
-        frame.SetTag = function (_, tagType)
-            tag:SetText(tagType)
-            tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
-        end
+    frame.SetTag = function (_, tagType)
+        tag:SetText(tagType)
+        tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
     end
 
-    if (not frame.text) then
-        local textFrame = frame:CreateFontString(nil, 'OVERLAY')
-        textFrame:SetFont(QF.default.font, 8, 'OUTLINE')
-        textFrame:SetPoint('LEFT', frame.tag, 'RIGHT', 10, 0)
-        textFrame:SetWidth(0)
-        frame.text = textFrame
-        frame.SetText = function (_, value) textFrame:SetText(value) end
-        frame.SetTextColor = function (_, r, g, b, a)
-            textFrame:SetVertexColor(r, g, b, a)
-        end
+    local textFrame = frame:CreateFontString(nil, 'OVERLAY')
+    textFrame:SetFont(QF.default.font, 8, 'OUTLINE')
+    textFrame:SetPoint('LEFT', frame.tag, 'RIGHT', 10, 0)
+    textFrame:SetWidth(0)
+    frame.text = textFrame
+    frame.SetText = function (_, value) textFrame:SetText(value) end
+    frame.SetTextColor = function (_, r, g, b, a)
+        textFrame:SetVertexColor(r, g, b, a)
     end
 
-    if (not frame.hoverContainer) then
-        local hoverContainer = CreateFrame('Frame', nil, frame)
-        hoverContainer:SetAllPoints()
-        local hoverBorder = hoverContainer:CreateTexture()
-        hoverContainer.border = hoverBorder
-        frame.hoverContainer = hoverContainer
-        hoverBorder:SetTexture(QF.default.barBorderGlow)
-        hoverBorder:SetPoint('CENTER', -30)
-        hoverBorder:SetHeight(75)
-        hoverBorder:SetWidth(350)
-        frame.animDur = 0.15
-        frame.onHover = QF.utils.animation.fade(hoverContainer, frame.animDur,
-            0, 1)
-        frame.onHoverLeave = QF.utils.animation.fade(hoverContainer,
-            frame.animDur, 1, 0)
-        frame.SetHoverColor = function (self)
-            hoverBorder:SetVertexColor(unpack(self.hoverColor))
-        end
-        frame:SetHoverColor()
+    local hoverContainer = CreateFrame('Frame', nil, frame)
+    hoverContainer:SetAllPoints()
+    local hoverBorder = hoverContainer:CreateTexture()
+    hoverContainer.border = hoverBorder
+    frame.hoverContainer = hoverContainer
+    hoverBorder:SetTexture(QF.default.barBorderGlow)
+    hoverBorder:SetPoint('CENTER', -30)
+    hoverBorder:SetHeight(75)
+    hoverBorder:SetWidth(350)
+    frame.animDur = 0.15
+    frame.onHover = QF.utils.animation.fade(hoverContainer, frame.animDur,
+        0, 1)
+    frame.onHoverLeave = QF.utils.animation.fade(hoverContainer,
+        frame.animDur, 1, 0)
+    frame.SetHoverColor = function (self)
+        hoverBorder:SetVertexColor(unpack(self.hoverColor))
     end
+    frame:SetHoverColor()
     frame.hoverContainer:SetAlpha(0)
 
-    if (not frame.cdText) then
-        local cdText = frame:CreateFontString(nil, 'OVERLAY')
-        cdText:SetFont(QF.default.font, 8, 'OUTLINE')
-        cdText:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
-        cdText:SetWidth(0)
-        frame.cdText = cdText
-    else
-        frame:SetScript('OnUpdate', nil)
-        frame.cdText:SetText('')
+    local cdText = frame:CreateFontString(nil, 'OVERLAY')
+    cdText:SetFont(QF.default.font, 8, 'OUTLINE')
+    cdText:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
+    cdText:SetWidth(0)
+    frame.cdText = cdText
+
+    local sourceIcon = frame:CreateTexture(nil, 'OVERLAY')
+    sourceIcon:SetSize(14, 14)
+    sourceIcon:SetPoint('RIGHT', -10, 0)
+    sourceIcon:Hide()
+
+    frame.SetSourceIcon = function (self, iconPath)
+        self.sourceIcon:SetTexture(iconPath)
+        self.sourceIcon:Show()
+        self.cdText:ClearAllPoints()
+        self.cdText:SetPoint('RIGHT', sourceIcon, 'LEFT', -10, 0)
     end
 
-    if (not frame.notAvailable) then
-        local notAvailable = frame:CreateFontString(nil, 'OVERLAY')
-        notAvailable:SetFont(QF.default.font, 8, 'OUTLINE')
-        notAvailable:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
-        notAvailable:SetWidth(0)
-        notAvailable:SetVertexColor(0.54, 0.54, 0.54, 1)
-        notAvailable:SetText('Not Available')
-        frame.notAvailable = notAvailable
+    frame.HideSourceIcon = function (self)
+        self.sourceIcon:Hide()
+        self.cdText:ClearAllPoints()
+        self.cdText:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
     end
-    frame.notAvailable:Hide()
+    frame.sourceIcon = sourceIcon
+
+    local notAvailable = frame:CreateFontString(nil, 'OVERLAY')
+    notAvailable:SetFont(QF.default.font, 8, 'OUTLINE')
+    notAvailable:SetPoint('RIGHT', frame, 'RIGHT', -10, 0)
+    notAvailable:SetWidth(0)
+    notAvailable:SetVertexColor(0.54, 0.54, 0.54, 1)
+    notAvailable:SetText('Not Available')
+    frame.notAvailable = notAvailable
 
     frame.HandleCD = function (self, suggestionData)
         local setCDText = function ()
@@ -317,6 +333,16 @@ suggestions.ConfigureFrame = function (self, frame)
     end
 
     frame.init = function (self)
+        self.notAvailable:Hide()
+        self.isDisabled = false
+        self:SetDesatured(false)
+        self:SetScript('OnUpdate', nil)
+        self.cdText:SetText('')
+        self.attributes = {}
+        self.hoverColor = { 1, 0.84, 0, 1 }
+        self.isDisabledColor = { 0.30, 0.30, 0.30, 1 }
+
+
         local data = self.suggestion.data
         self:SetText(data.name)
         self:SetIcon(data.icon)
@@ -325,9 +351,15 @@ suggestions.ConfigureFrame = function (self, frame)
         self:SetTextColor(1, 1, 1, 1)
         local onCD = self:HandleCD(data)
 
+        if (data.sourceIconPath) then
+            self:SetSourceIcon(data.sourceIconPath)
+        else
+            self:HideSourceIcon()
+        end
+
         if (not onCD) then
             if (data.type == QF.LOOKUP_TYPE.SPELL) then
-                if (not IsSpellKnown(data.spellId)) then
+                if (not C_SpellBook.IsSpellInSpellBook(data.spellId)) then
                     self:SetDisabled()
                 end
             elseif (data.type == QF.LOOKUP_TYPE.ITEM) then
@@ -337,6 +369,8 @@ suggestions.ConfigureFrame = function (self, frame)
             end
         end
     end
+
+    frame.isConfigured = true
 end
 
 suggestions.ClearBindings = function (self)
@@ -382,7 +416,11 @@ suggestions.SetOnClick = function (self, frame, suggestion)
         elseif (suggestion.data.type == QF.LOOKUP_TYPE.LUA) then
             frame:SetScript('OnMouseDown',
                 function ()
-                    loadstring(suggestion.data.lua)()
+                    if (type(suggestion.data.lua) == 'function') then
+                        suggestion.data.lua(suggestion.data.sourceId or suggestion.data.id)
+                    else
+                        loadstring(suggestion.data.lua)()
+                    end
                 end)
             frame:SetAttribute('type', '')
         end

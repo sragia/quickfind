@@ -54,8 +54,6 @@ options.CreatePresets = function (self)
     }, window)
     allPresetDisabledReset:SetPoint('BOTTOMLEFT', 40, 30)
 
-
-
     local previous = nil
     for _, preset in pairs(presets:getAvailable()) do
         local input = toggle:Get({ text = preset.name, value = presets:isEnabled(preset.name) }, window.container)
@@ -125,7 +123,7 @@ options.openPresets = function (self)
     self.presets:ShowWindow()
 end
 
-options.init = function (self)
+options.SetupWindow = function (self)
     local settingsFrame = window:getFrame({ title = 'Settings', showSettings = false, frameLevel = 50, offset = { x = 400, y = 200 } })
     self.settings = settingsFrame
     local windowFrame = window:getFrame({
@@ -303,13 +301,19 @@ options.PopulateOptions = function (self)
     optionContainer:DestroyAllOptions()
     self.optionFrames = {}
     local numSuggestions = QF:GetNumSuggestions()
-    for id, optionData in QF.utils.spairs(QF:getAllSuggestions(self.filters, optionCap), function (t, a, b)
+    for id, optionData in QF.utils.spairs(QF:getAllSuggestions(self.filters, optionCap, true), function (t, a, b)
+        if (not t[a].created) then
+            return false
+        end
+        if (not t[b].created) then
+            return true
+        end
         if (t[a].created and t[b].created) then
             return t[a].created < t[b].created
         end
         return true
     end) do
-        if (optionData) then
+        if (optionData and not optionData.isOutsideSource) then
             table.insert(self.optionFrames, optionContainer:CreateOption(optionData, self.OnDelete(id), self))
         end
     end
@@ -519,6 +523,9 @@ options.PopulateSettings = function (self)
 end
 
 options.ShowFrame = function (self)
+    if (not self.window) then
+        self:SetupWindow()
+    end
     self.window:ShowWindow()
 end
 

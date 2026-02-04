@@ -22,6 +22,8 @@ QF.LOOKUP_TYPE = {
     LUA = 'LUA'
 }
 
+QuickFind.LOOKUP_TYPE = QF.LOOKUP_TYPE
+
 QF.typeOptions = {
     [QF.LOOKUP_TYPE.SPELL] = 'Spell',
     [QF.LOOKUP_TYPE.TOY] = 'Toy',

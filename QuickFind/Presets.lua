@@ -153,8 +153,6 @@ presets.build = function (self)
             end
         end
     end
-
-    QF:GetModule('options-core'):PopulateOptions()
 end
 
 ---@param self Presets

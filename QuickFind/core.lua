@@ -99,7 +99,7 @@ QF.settings = {
 
 ---Get all suggestions - Saved and Enabled Presets
 ---@param self QF
-QF.getAllSuggestions = function (self, filters, maxSuggestions)
+QF.getAllSuggestions = function (self, filters, maxSuggestions, ignoreSources)
     local presetSuggestions = {}
 
     for name, suggestions in pairs(QF.builtPresets) do
@@ -108,11 +108,40 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
         end
     end
 
-    ---@class Presets
-    local preset = QF:GetModule('presets')
+
 
     -- Filter out by presets that were added to data and filters if provided
     local suggestions = QF.utils.shallowCloneMerge(QF.data, presetSuggestions)
+
+    ---@class Presets
+    local preset = QF:GetModule('presets')
+    if (not ignoreSources) then
+        local sources = QF:GetModule('api'):GetSources()
+
+        for _, source in pairs(sources) do
+            local ok, sourceSuggestions = pcall(source.get)
+            if (ok) then
+                local formattedSuggestions = {}
+                -- Add icon path to all suggestions
+                local i = 1
+                for _, suggestion in pairs(sourceSuggestions) do
+                    local cloned = CopyTable(suggestion)
+                    if (source.iconPath) then
+                        cloned.sourceIconPath = source.iconPath
+                    end
+                    cloned.sourceId = suggestion.id
+                    cloned.isOutsideSource = true
+                    cloned.id = 'source_' .. QF.utils.generateNewId(5)
+                    formattedSuggestions['source_' .. source.name .. '_' .. i] = cloned
+                    i = i + 1
+                end
+
+                suggestions = QF.utils.shallowCloneMerge(suggestions, formattedSuggestions or sourceSuggestions)
+            else
+                QF.utils.printOut('Error getting suggestions from source: ' .. source.name)
+            end
+        end
+    end
     local filtered = {}
     for k, v in pairs(suggestions) do
         if (v.isNew) then
@@ -122,6 +151,12 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions)
     end
     local i = 0
     for k, v in QF.utils.spairs(suggestions, function (t, a, b)
+        if (not t[a].created) then
+            return false
+        end
+        if (not t[b].created) then
+            return true
+        end
         if (t[a].created and t[b].created) then
             return t[a].created < t[b].created
         end

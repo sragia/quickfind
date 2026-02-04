@@ -43,6 +43,9 @@ QF.utils = {
         end
         return true
     end,
+    printOut = function (outputString)
+        print('|cffc334eb[QuickFind]|r ' .. outputString)
+    end,
     transformSource = function (source)
         local t = {}
         for _, v in pairs(source) do

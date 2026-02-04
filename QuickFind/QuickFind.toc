@@ -16,6 +16,7 @@ ExalityFrames/ExalityFrames.xml
 Init.lua
 Util.lua
 Core.lua
+API.lua
 Welcome.lua
 Cache.lua
 
