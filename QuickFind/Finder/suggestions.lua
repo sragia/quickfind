@@ -164,9 +164,13 @@ suggestions.ConfigureFrame = function (self, frame)
     tagTexture:SetVertexColor(0.44, 0, 0.94)
     frame.tag = tag
 
-    frame.SetTag = function (_, tagType)
-        tag:SetText(tagType)
-        tagTexture:SetVertexColor(unpack(QF.default.tagColors[tagType]))
+    frame.SetTag = function (_, tagInfo)
+        tag:SetText(tagInfo.text)
+        if (tagInfo.color) then
+            tagTexture:SetVertexColor(unpack(tagInfo.color))
+        else
+            tagTexture:SetVertexColor(0.4, 0.4, 0.4)
+        end
     end
 
     local textFrame = frame:CreateFontString(nil, 'OVERLAY')
@@ -346,7 +350,14 @@ suggestions.ConfigureFrame = function (self, frame)
         local data = self.suggestion.data
         self:SetText(data.name)
         self:SetIcon(data.icon)
-        self:SetTag(data.type)
+        if (data.label) then
+            self:SetTag(data.label)
+        else
+            self:SetTag({
+                text = data.type,
+                color = QF.default.tagColors[data.type]
+            })
+        end
         self:SetHoverColor()
         self:SetTextColor(1, 1, 1, 1)
         local onCD = self:HandleCD(data)
