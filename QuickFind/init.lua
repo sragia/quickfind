@@ -51,6 +51,12 @@ QF.textures = {
         interfaceSettings = [[Interface/Addons/QuickFind/Media/Texture/Frames/interfaceSettingsIcon]],
         boss = [[Interface/Addons/QuickFind/Media/Texture/Frames/bossIcon]],
         reset = [[Interface/Addons/QuickFind/Media/Texture/Frames/reset]]
+    },
+    styles = {
+        compact = {
+            background = [[Interface/Addons/QuickFind/Media/Texture/Compact/background.png]],
+            border = [[Interface/Addons/QuickFind/Media/Texture/Compact/border.png]],
+        }
     }
 }
 

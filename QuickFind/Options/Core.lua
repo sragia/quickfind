@@ -450,31 +450,65 @@ options.PopulateSettings = function (self)
     local sFrame = self.settings
 
     if (not sFrame.scaleInput) then
-        local scaleInput = textInput:Get({
+        local scaleInput = EXFrames:GetFrame('range-input'):Create()
+        scaleInput:SetLabel('Search Scale')
+        scaleInput:SetOptionData({
             label = 'Search Scale',
-            initial = QF.settings.scale
-        }, sFrame.container)
-        scaleInput.onChange = function (value)
+            min = 0.5,
+            max = 3,
+            step = 0.1,
+            currentValue = function ()
+                return QF.settings.scale
+            end
+        });
+        scaleInput:SetOnChange(function (value)
             if (tonumber(value)) then
                 QF.settings:SetValue('scale', tonumber(value));
             end
-        end
+        end)
+        scaleInput:SetParent(sFrame.container)
         scaleInput:SetPoint('TOPLEFT', 20, 0)
         sFrame.scaleInput = scaleInput
     end
 
     if (not sFrame.maxSuggestions) then
-        local maxSuggestions = textInput:Get({
+        local maxSuggestions = EXFrames:GetFrame('range-input'):Create()
+        maxSuggestions:SetLabel('Max Available Suggestions')
+        maxSuggestions:SetOptionData({
             label = 'Max Available Suggestions',
-            initial = QF.settings.maxSuggestions
-        }, sFrame.container)
-        maxSuggestions.onChange = function (value)
+            min = 1,
+            max = 25,
+            step = 1,
+            currentValue = function ()
+                return QF.settings.maxSuggestions
+            end
+        });
+        maxSuggestions:SetOnChange(function (value)
             if (tonumber(value)) then
                 QF.settings:SetValue('maxSuggestions', tonumber(value));
             end
-        end
+        end)
+        maxSuggestions:SetParent(sFrame.container)
         maxSuggestions:SetPoint('TOPLEFT', sFrame.scaleInput, 'TOPRIGHT', 20, 0)
         sFrame.maxSuggestions = maxSuggestions
+    end
+
+    if (not sFrame.styleDropdown) then
+        local styleDropdown = EXFrames:GetFrame('dropdown'):Create({
+            initial = QF.settings.style,
+            options = {
+                [QF.styles.DEFAULT] = 'Default',
+                [QF.styles.COMPACT] = 'Compact'
+            },
+            onChange = function (value)
+                QF.settings:SetValue('style', value);
+            end,
+            label = 'Style',
+            width = 160,
+            height = 40
+        }, sFrame.container)
+        styleDropdown:SetPoint('TOPLEFT', sFrame.maxSuggestions, 'TOPRIGHT', 20, 0)
+        sFrame.styleDropdown = styleDropdown
     end
 
     if (not sFrame.keybind) then

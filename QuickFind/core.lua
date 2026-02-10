@@ -92,9 +92,15 @@ QF.DeleteByKey = function (self, id)
     self.data[id] = nil
 end
 
+QF.styles = {
+    DEFAULT = 'default',
+    COMPACT = 'compact',
+}
+
 QF.settings = {
     scale = QF.default.scale,
-    maxSuggestions = QF.default.maxSuggestions
+    maxSuggestions = QF.default.maxSuggestions,
+    style = QF.styles.DEFAULT
 }
 
 ---Get all suggestions - Saved and Enabled Presets
@@ -107,8 +113,6 @@ QF.getAllSuggestions = function (self, filters, maxSuggestions, ignoreSources)
             presetSuggestions = QF.utils.shallowCloneMerge(presetSuggestions, suggestions)
         end
     end
-
-
 
     -- Filter out by presets that were added to data and filters if provided
     local suggestions = QF.utils.shallowCloneMerge(QF.data, presetSuggestions)

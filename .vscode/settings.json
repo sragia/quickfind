@@ -41,7 +41,8 @@
         "Round",
         "ipairs_reverse",
         "PixelUtil",
-        "ColorPickerFrame"
+        "ColorPickerFrame",
+        "DEFAULT"
     ],
     "emmylua.spell.dict": [
         "utils",

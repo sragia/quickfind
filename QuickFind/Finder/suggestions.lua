@@ -8,6 +8,95 @@ local suggestions = QF:GetModule(moduleName)
 
 suggestions.suggestions = nil
 
+suggestions.style = {
+    [QF.styles.DEFAULT] = {
+        leftPoint = -25,
+        bottomPoint = -15,
+        topMargin = 15,
+        itemHeight = 32,
+
+        width = 320,
+        height = 26,
+
+        bgTexture = QF.default.barBg,
+        bgColor = { 0, 0, 0, 0.6 },
+        bgSliceMargins = { 0, 0, 0, 0 },
+        bgSliceMode = Enum.UITextureSliceMode.Stretched,
+        bgPoint = { 'CENTER', -80 },
+        bgHeight = 75,
+        bgWidth = 350,
+
+        iconSize = 18,
+        iconPoint = { 'LEFT', 5, 0 },
+
+        tagFontSize = 6,
+        tagPoint = { 'LEFT' },
+        tagContainerPoint = { 'LEFT', 'RIGHT', 10, 0 },
+
+        fontSize = 8,
+        fontPoint = { 'LEFT', 'RIGHT', 10, 0 },
+
+        hoverTexture = QF.default.barBorderGlow,
+        hoverPoint = { 'CENTER', -30 },
+        hoverHeight = 75,
+        hoverWidth = 350,
+        hoverSliceMargins = { 0, 0, 0, 0 },
+        hoverSliceMode = Enum.UITextureSliceMode.Stretched,
+
+        cdPoint = { 'RIGHT', 'RIGHT', -10, 0 },
+
+        sourceIconSize = 14,
+        sourceIconPoint = { 'RIGHT', -10, 0 },
+
+        notAvailablePoint = { 'RIGHT', 'RIGHT', -10, 0 },
+
+    },
+    [QF.styles.COMPACT] = {
+
+        leftPoint = -20,
+        bottomPoint = -20,
+        topMargin = 5,
+        itemHeight = 22,
+
+
+        width = 270,
+        height = 20,
+
+        bgTexture = QF.textures.styles.compact.background,
+        bgColor = { 0, 0, 0, 0.6 },
+        bgSliceMargins = { 5, 5, 5, 5 },
+        bgSliceMode = Enum.UITextureSliceMode.Stretched,
+        bgPoint = { 'CENTER' },
+        bgHeight = 20,
+        bgWidth = 270,
+
+        borderShow = false,
+
+        iconSize = 14,
+        iconPoint = { 'LEFT', 5, 0 },
+
+        tagFontSize = 6,
+        tagPoint = { 'LEFT' },
+        tagContainerPoint = { 'LEFT', 'RIGHT', 10, 0 },
+
+        fontSize = 8,
+        fontPoint = { 'LEFT', 'RIGHT', 10, 0 },
+
+        hoverTexture = QF.textures.styles.compact.border,
+        hoverPoint = { 'CENTER' },
+        hoverHeight = 20,
+        hoverWidth = 270,
+        hoverSliceMargins = { 5, 5, 5, 5 },
+        hoverSliceMode = Enum.UITextureSliceMode.Stretched,
+        cdPoint = { 'RIGHT', 'RIGHT', -10, 0 },
+
+        sourceIconSize = 14,
+        sourceIconPoint = { 'RIGHT', -10, 0 },
+
+        notAvailablePoint = { 'RIGHT', 'RIGHT', -10, 0 },
+    }
+}
+
 suggestions.init = function (self)
     self.suggestionContainer = CreateFrame('Frame', 'QFSuggestionsContainer',
         UIParent)
@@ -58,8 +147,9 @@ suggestions.Show = function (self)
         local left, bottom = finder.editBox:GetRect()
         local scale = finder.container:GetScale()
         self.suggestionContainer:SetScale(scale)
+        local style = self.style[QF.settings.style]
         self.suggestionContainer:SetPoint('TOPLEFT', UIParent, 'BOTTOMLEFT',
-            left - 25, bottom - 15)
+            left + style.leftPoint, bottom + style.bottomPoint)
         self.suggestionContainer:Show()
         self.suggestionContainer.fadeIn:Play()
     end
@@ -77,10 +167,56 @@ suggestions.ClearSuggestions = function (self)
     self.suggestions = nil
 end
 
+suggestions.Style = function (self, frame)
+    local style = suggestions.style[QF.settings.style]
+
+    if (style) then
+        frame:SetSize(style.width, style.height)
+
+        frame.bg:SetTexture(style.bgTexture)
+        frame.bg:SetVertexColor(unpack(style.bgColor))
+        frame.bg:SetTextureSliceMargins(unpack(style.bgSliceMargins))
+        frame.bg:SetTextureSliceMode(style.bgSliceMode)
+        frame.bg:SetPoint(unpack(style.bgPoint))
+        frame.bg:SetHeight(style.bgHeight)
+        frame.bg:SetWidth(style.bgWidth)
+
+        frame.icon:SetSize(style.iconSize, style.iconSize)
+        frame.icon:SetPoint(unpack(style.iconPoint))
+
+        frame.tag:SetFont(QF.default.font, style.tagFontSize, 'OUTLINE')
+        frame.tag:SetPoint(unpack(style.tagPoint))
+        frame.tagContainer:SetPoint(style.tagContainerPoint[1], frame.icon, style.tagContainerPoint[2],
+            style.tagContainerPoint[3], style.tagContainerPoint[4])
+
+        frame.text:SetFont(QF.default.font, style.fontSize, 'OUTLINE')
+        frame.text:SetPoint(style.fontPoint[1], frame.tag, style.fontPoint[2], style.fontPoint[3], style.fontPoint[4])
+
+        frame.hoverContainer.border:SetPoint(unpack(style.hoverPoint))
+        frame.hoverContainer.border:SetHeight(style.hoverHeight)
+        frame.hoverContainer.border:SetWidth(style.hoverWidth)
+        frame.hoverContainer.border:SetTexture(style.hoverTexture)
+        frame.hoverContainer.border:SetTextureSliceMargins(unpack(style.hoverSliceMargins))
+        frame.hoverContainer.border:SetTextureSliceMode(style.hoverSliceMode)
+
+        frame.cdText:SetFont(QF.default.font, style.fontSize, 'OUTLINE')
+        frame.cdText:SetPoint(style.cdPoint[1], frame, style.cdPoint[2], style.cdPoint[3], style.cdPoint[4])
+
+        frame.sourceIcon:SetSize(style.sourceIconSize, style.sourceIconSize)
+        frame.sourceIcon:SetPoint(style.sourceIconPoint[1], frame, style.sourceIconPoint[2], style.sourceIconPoint[3],
+            style.sourceIconPoint[4])
+
+        frame.notAvailable:SetPoint(style.notAvailablePoint[1], frame, style.notAvailablePoint[2],
+            style.notAvailablePoint[3], style.notAvailablePoint[4])
+        frame.notAvailable:SetFont(QF.default.font, style.fontSize, 'OUTLINE')
+    end
+end
+
 suggestions.Refresh = function (self, value)
     local suggestions = QF.utils.suggestMatch(value, self:GetSuggestions())
     self.buttonPool:ReleaseAll()
     self.activeButtons = {}
+    local style = self.style[QF.settings.style]
     for index, suggestion in ipairs(suggestions) do
         if (index > QF.settings.maxSuggestions) then break end
         local f = self.buttonPool:Acquire()
@@ -88,6 +224,7 @@ suggestions.Refresh = function (self, value)
         if (not f.isConfigured) then
             self:ConfigureFrame(f)
         end
+        self:Style(f)
         f.index = index
         f.suggestion = suggestion
         f.selected = index == 1
@@ -96,7 +233,7 @@ suggestions.Refresh = function (self, value)
         f:Show()
 
         f:SetPoint('TOPLEFT', self.suggestionContainer, 'BOTTOMLEFT', 0,
-            ((index - 1) * -32) - 15)
+            ((index - 1) * -style.itemHeight) - style.topMargin)
         table.insert(self.activeButtons, f)
     end
 end
@@ -123,7 +260,6 @@ suggestions.ConfigureFrame = function (self, frame)
     tex:SetHeight(75)
     tex:SetWidth(350)
 
-
     local iconContainer = CreateFrame('Frame')
     iconContainer:SetParent(frame)
     iconContainer:SetSize(18, 18)
@@ -149,6 +285,7 @@ suggestions.ConfigureFrame = function (self, frame)
     tagContainer:SetParent(frame)
     tagContainer:SetPoint('LEFT', frame.icon, 'RIGHT', 10, 0)
     tagContainer:SetSize(1, 1)
+    frame.tagContainer = tagContainer
 
     local tag = tagContainer:CreateFontString(nil, 'OVERLAY')
     tag:SetFont(QF.default.font, 6, 'OUTLINE')
