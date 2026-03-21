@@ -41,6 +41,7 @@ const portalFlyoutItems = [
     '231', // DF Raid
     '232', // TWW
     '242', // TWW Raids
+    '244', // Midnight S1
 ]
 
 function parseCsv(csv: string): Promise<FlyoutItemsTableItem[]> {
@@ -62,7 +63,12 @@ async function main() {
     const response = await fetch(`https://wago.tools/db2/SpellFlyoutItem/csv?build=${build}`);
     const csv = await response.text() as any;
     const flyoutItems = await parseCsv(csv);
-    const portals = flyoutItems.filter(item => portalFlyoutItems.includes(item.SpellFlyoutID)).map(item => item.SpellID);
+    const portals = Array.from(new Set(
+        flyoutItems
+            .filter(item => portalFlyoutItems.includes(item.SpellFlyoutID))
+            .map(item => item.SpellID)
+    ));
+    
     
     createPreset(portals, 'Instance Portals', 'SPELL', 'Adds quick access to all Raid and Dungeon portals');
 }
