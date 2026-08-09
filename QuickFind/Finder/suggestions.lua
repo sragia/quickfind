@@ -387,7 +387,7 @@ suggestions.ConfigureFrame = function (self, frame)
                 start, duration = C_Item.GetItemCooldown(suggestionData.itemId)
             end
 
-            if (start + duration > GetTime()) then
+            if (not (issecretvalue(start) or issecretvalue(duration)) and start + duration > GetTime()) then
                 self.cdText:SetText('On CD: ' ..
                     WrapTextInColorCode(
                         QF.utils
