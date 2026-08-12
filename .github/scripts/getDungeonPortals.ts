@@ -41,6 +41,7 @@ const portalFlyoutItems = [
     '231', // DF Raid
     '232', // TWW
     '242', // TWW Raids
+    '246', // Midnight 
     '244', // Midnight S1
 ]
 
@@ -68,8 +69,8 @@ async function main() {
             .filter(item => portalFlyoutItems.includes(item.SpellFlyoutID))
             .map(item => item.SpellID)
     ));
-    
-    
+    portals.push('1254555'); // Pit of Saron
+
     createPreset(portals, 'Instance Portals', 'SPELL', 'Adds quick access to all Raid and Dungeon portals');
 }
 
