@@ -7,6 +7,8 @@ QF.createPreset({
     built = true,
     description = 'Adds quick access to boss encounter pages. Only for current expansion/season',
     getBuiltData = function ()
+        ---@class Presets
+        local presets = QF:GetModule('presets')
         local data = {}
         --2607 Ulgrax
         local tier = EJ_GetNumTiers()
@@ -34,6 +36,8 @@ QF.createPreset({
                 end
 
                 instanceIndex = instanceIndex + 1
+                presets:yield()
+                EJ_SelectTier(tier)
                 instanceID = EJ_GetInstanceByIndex(instanceIndex, isRaid)
             end
         end

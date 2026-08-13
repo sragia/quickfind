@@ -10,64 +10,11 @@ local presets = QF:GetModule(moduleName)
 ---@class Cache
 local cache = QF:GetModule('cache')
 
----@param self Presets
----@param id string
----@return function
-presets.spellCacheCallback = function (self, id)
-    return function (_, spellID, success)
-        if (success) then
-            local data = self:getSpellData(spellID)
-            if (data) then
-                cache:saveSpellData(spellID, data)
-                self:build()
-            end
-        end
-        QF.handler:unregisterCallback('SPELL_DATA_LOAD_RESULT', id)
-    end
-end
+-- Stay well under the script timeout and keep login/frames responsive.
+local BUILD_TIME_BUDGET_MS = 10
 
----@param self Presets
----@param spellID number
----@return SpellDataItem|false
-presets.getSpellData = function (self, spellID)
-    if (cache:hasSpell(spellID)) then return cache:getSpellData(spellID) end
-
-    if (not C_Spell.DoesSpellExist(spellID)) then return false end
-
-    if (C_Spell.IsSpellDataCached(spellID)) then
-        local spellInfo = C_Spell.GetSpellInfo(spellID)
-        local spellDescription = C_Spell.GetSpellDescription(spellID)
-        if (not spellDescription) then
-            local spell = Spell:CreateFromSpellID(spellID)
-            spell:ContinueOnSpellLoad(function ()
-                local spellData = {
-                    spellID = spellID,
-                    name = spell:GetSpellName(),
-                    iconID = spellInfo.iconID,
-                    description = spell:GetSpellDescription()
-                }
-                cache:saveSpellData(spellID, spellData)
-                self:build()
-            end)
-            return false
-        else
-            local spellData = {
-                spellID = spellID,
-                name = spellInfo.name,
-                iconID = spellInfo.iconID,
-                description = spellDescription
-            }
-            cache:saveSpellData(spellID, spellData)
-            return spellData
-        end
-    else
-        local id = QF.utils.generateNewId(5)
-        QF.handler:registerCallback('SPELL_DATA_LOAD_RESULT', id,
-            self:spellCacheCallback(id))
-        C_Spell.RequestLoadSpellData(spellID)
-        return false
-    end
-end
+-- spellID -> { [presetName] = true } while client spell data is still loading
+local pendingSpellPresets = {}
 
 local function addPresetInfo(data, ID, name)
     return QF.utils.shallowCloneMerge(data, {
@@ -78,51 +25,159 @@ local function addPresetInfo(data, ID, name)
     })
 end
 
----Build preset suggestions
+local function ensureBucket(name)
+    QF.builtPresets[name] = QF.builtPresets[name] or {}
+    return QF.builtPresets[name]
+end
+
+---Yield the in-progress build when this frame's time budget is spent.
 ---@param self Presets
-presets.build = function (self)
+presets.yield = function (self)
+    if not coroutine.running() then return end
+    if debugprofilestop() - (self._buildStart or 0) >= BUILD_TIME_BUDGET_MS then
+        coroutine.yield()
+    end
+end
+
+---@param self Presets
+---@param name string
+---@param spellID number
+---@param spellData SpellDataItem
+presets.addSpellEntry = function (self, name, spellID, spellData)
+    local bucket = ensureBucket(name)
+    bucket[name .. spellID] = addPresetInfo({
+        icon = spellData.iconID,
+        name = spellData.name,
+        spellId = spellID,
+        type = QF.LOOKUP_TYPE.SPELL,
+        tags = spellData.description
+    }, spellID, name)
+end
+
+---@param self Presets
+---@param spellID number
+---@param spellData SpellDataItem
+presets.addPendingSpellEntries = function (self, spellID, spellData)
+    local names = pendingSpellPresets[spellID]
+    pendingSpellPresets[spellID] = nil
+    if not names then return end
+    for name in pairs(names) do
+        self:addSpellEntry(name, spellID, spellData)
+    end
+end
+
+---@param self Presets
+presets.ensureSpellLoadHandler = function (self)
+    if self._spellLoadHandler then return end
+    self._spellLoadHandler = true
+    QF.handler:registerCallback('SPELL_DATA_LOAD_RESULT', 'presets', function (_, spellID, success)
+        if not pendingSpellPresets[spellID] then return end
+        if not success then
+            pendingSpellPresets[spellID] = nil
+            return
+        end
+        local spellData = self:getSpellData(spellID)
+        if spellData then
+            self:addPendingSpellEntries(spellID, spellData)
+        end
+    end)
+end
+
+---@param self Presets
+---@param spellID number
+---@param presetName? string
+---@return SpellDataItem|false
+presets.getSpellData = function (self, spellID, presetName)
+    if (cache:hasSpell(spellID)) then return cache:getSpellData(spellID) end
+
+    if (not C_Spell.DoesSpellExist(spellID)) then return false end
+
+    local function trackPending()
+        if not presetName then return end
+        pendingSpellPresets[spellID] = pendingSpellPresets[spellID] or {}
+        pendingSpellPresets[spellID][presetName] = true
+    end
+
+    if (C_Spell.IsSpellDataCached(spellID)) then
+        local spellInfo = C_Spell.GetSpellInfo(spellID)
+        local spellDescription = C_Spell.GetSpellDescription(spellID)
+        if (not spellDescription) then
+            trackPending()
+            local spell = Spell:CreateFromSpellID(spellID)
+            spell:ContinueOnSpellLoad(function ()
+                local spellData = {
+                    spellID = spellID,
+                    name = spell:GetSpellName(),
+                    iconID = spellInfo.iconID,
+                    description = spell:GetSpellDescription()
+                }
+                cache:saveSpellData(spellID, spellData)
+                self:addPendingSpellEntries(spellID, spellData)
+            end)
+            return false
+        end
+        local spellData = {
+            spellID = spellID,
+            name = spellInfo.name,
+            iconID = spellInfo.iconID,
+            description = spellDescription
+        }
+        cache:saveSpellData(spellID, spellData)
+        return spellData
+    end
+
+    if pendingSpellPresets[spellID] then
+        trackPending()
+        return false
+    end
+
+    trackPending()
+    self:ensureSpellLoadHandler()
+    C_Spell.RequestLoadSpellData(spellID)
+    return false
+end
+
+---@param self Presets
+presets.buildAll = function (self)
     for name, data in pairs(QF.presets) do
-        QF.builtPresets[name] = QF.builtPresets[name] or {}
+        local bucket = ensureBucket(name)
         if (data.type == QF.LOOKUP_TYPE.SPELL) then
             for _, spellID in pairs(data.data) do
-                local spellData = self:getSpellData(spellID)
-                if (spellData) then
-                    QF.builtPresets[name][name .. spellID] = addPresetInfo({
-                        icon = spellData.iconID,
-                        name = spellData.name,
-                        spellId = spellID,
-                        type = QF.LOOKUP_TYPE.SPELL,
-                        tags = spellData.description
-                    }, spellID, name)
+                if not bucket[name .. spellID] then
+                    local spellData = self:getSpellData(spellID, name)
+                    if (spellData) then
+                        self:addSpellEntry(name, spellID, spellData)
+                    end
                 end
+                self:yield()
             end
         elseif (data.type == QF.LOOKUP_TYPE.MOUNT) then
             if (data.all) then
-                -- Get All mounts
-                for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
+                local mountIDs = C_MountJournal.GetMountIDs()
+                for i = 1, #mountIDs do
                     local mountName, spellID, icon, _, isUsable =
-                        C_MountJournal.GetMountInfoByID(mountID)
+                        C_MountJournal.GetMountInfoByID(mountIDs[i])
                     if (isUsable) then
-                        QF.builtPresets[name][name .. spellID] = addPresetInfo(
-                            {
-                                icon = icon,
-                                name = mountName,
-                                mountName = mountName,
-                                tags = '',
-                                type = QF.LOOKUP_TYPE.MOUNT
-                            }, spellID, name)
+                        bucket[name .. spellID] = addPresetInfo({
+                            icon = icon,
+                            name = mountName,
+                            mountName = mountName,
+                            tags = '',
+                            type = QF.LOOKUP_TYPE.MOUNT
+                        }, spellID, name)
                     end
+                    self:yield()
                 end
             end
         elseif (data.type == QF.LOOKUP_TYPE.TOY) then
             if (data.all) then
-                for i = 1, C_ToyBox.GetNumToys() do
+                local numToys = C_ToyBox.GetNumToys()
+                for i = 1, numToys do
                     local toyID = C_ToyBox.GetToyFromIndex(i)
                     if (toyID > 0 and C_ToyBox.IsToyUsable(toyID)) then
                         local toyData = cache:getToyData(toyID)
                         if (not toyData) then
-                            local itemID, toyName, icon =
-                                C_ToyBox.GetToyInfo(toyID)
+                            local itemID, toyName, icon = C_ToyBox.GetToyInfo(toyID)
                             toyData = {
                                 itemID = itemID,
                                 toyName = toyName,
@@ -131,27 +186,66 @@ presets.build = function (self)
                             cache:saveToyData(toyID, toyData)
                         end
                         if toyData.toyName and PlayerHasToy(toyData.itemID) then
-                            QF.builtPresets[name][name .. toyID] =
-                                addPresetInfo({
-                                    icon = toyData.icon,
-                                    name = toyData.toyName,
-                                    type = QF.LOOKUP_TYPE.TOY,
-                                    itemId = toyData.itemID
-                                }, toyID, name)
+                            bucket[name .. toyID] = addPresetInfo({
+                                icon = toyData.icon,
+                                name = toyData.toyName,
+                                type = QF.LOOKUP_TYPE.TOY,
+                                itemId = toyData.itemID
+                            }, toyID, name)
                         end
                     end
+                    self:yield()
                 end
             end
         elseif (data.type == QF.LOOKUP_TYPE.LUA) then
             if (data.built) then
                 local built = data.getBuiltData()
-                for _, data in pairs(built) do
-                    QF.builtPresets[name][name .. data.id] = addPresetInfo(data,
-                        data.id,
-                        name)
+                for _, item in pairs(built) do
+                    bucket[name .. item.id] = addPresetInfo(item, item.id, name)
+                    self:yield()
                 end
             end
         end
+    end
+end
+
+---@param self Presets
+presets.resumeBuild = function (self)
+    if not self._buildCo or coroutine.status(self._buildCo) == 'dead' then
+        self._buildCo = nil
+        self._buildScheduled = false
+        return
+    end
+
+    self._buildStart = debugprofilestop()
+    local ok, err = coroutine.resume(self._buildCo)
+    if not ok then
+        self._buildCo = nil
+        self._buildScheduled = false
+        geterrorhandler()(err)
+        return
+    end
+
+    if self._buildCo and coroutine.status(self._buildCo) ~= 'dead' then
+        C_Timer.After(0, function () self:resumeBuild() end)
+    else
+        self._buildCo = nil
+        self._buildScheduled = false
+    end
+end
+
+---Build preset suggestions across frames so a cold cache cannot hitch or time out.
+---@param self Presets
+presets.build = function (self)
+    if self._buildCo and coroutine.status(self._buildCo) ~= 'dead' then
+        return
+    end
+    self._buildCo = coroutine.create(function ()
+        self:buildAll()
+    end)
+    if not self._buildScheduled then
+        self._buildScheduled = true
+        C_Timer.After(0, function () self:resumeBuild() end)
     end
 end
 
